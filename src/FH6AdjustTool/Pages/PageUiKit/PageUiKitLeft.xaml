@@ -1,0 +1,54 @@
+<local:MyPageLeft x:Class="PageUiKitLeft"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:local="clr-namespace:QING.UIKIT"
+                  AnimatedControl="PanAnimated"
+                  Width="320">
+    <Grid x:Name="PanAnimated">
+        <!-- 首页（Tuner）左栏：AI调校 -->
+        <Grid x:Name="GridTunerAI" Margin="14,18,14,12" Visibility="Visible">
+            <!-- AI反馈卡片 (移除标题和说明) -->
+            <local:MyCard Title="智能分析反馈" Margin="0">
+                <Grid Margin="12,38,12,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    
+                    <!-- AI 触发控制 -->
+                    <local:MyButton x:Name="BtnAIEnhance" Grid.Row="0" Text="✦ 触发 AI 增强调校" Padding="16,8" ColorType="Highlight" Height="36" HorizontalAlignment="Stretch" Margin="0,0,0,8" />
+                    <local:MyLoading x:Name="LoadAI" Grid.Row="1" Height="28" Width="28" AutoRun="False" HorizontalAlignment="Center" Margin="0,0,0,8" />
+                    
+                    <!-- AI 诊断内容/聊天历史 -->
+                    <local:MyScrollViewer x:Name="ScrollChat" Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,4,0,0">
+                        <StackPanel x:Name="PanChatList" VerticalAlignment="Top">
+                            <TextBlock x:Name="LabAISummary"
+                                       Text="尚未进行 AI 智能调优。在右侧调整好车辆参数后，点击上方的按钮，AI 将根据赛道数据生成专属的微调意见与详细诊断。"
+                                       TextWrapping="Wrap" FontSize="12.5" Foreground="{DynamicResource ColorBrushGray3}" LineHeight="1.5" />
+                        </StackPanel>
+                    </local:MyScrollViewer>
+
+                    <!-- 聊天输入交互 -->
+                    <Grid x:Name="GridChatInput" Grid.Row="3" Margin="0,8,0,0" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyTextBox x:Name="TxtChatInput" Height="34" HintText="发送消息继续对话..." VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <local:MyButton x:Name="BtnSendChat" Grid.Column="1" Text="发送" Padding="12,0" Height="34" ColorType="Highlight" VerticalAlignment="Center" />
+                    </Grid>
+                </Grid>
+            </local:MyCard>
+        </Grid>
+
+        <!-- 其他页左栏：二级导航 -->
+        <Grid x:Name="GridOtherNav" Margin="10,20,10,12" Visibility="Collapsed">
+            <StackPanel>
+                <TextBlock x:Name="LabNavTitle" Text="栏目导航" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrushGray3}" Margin="12,0,0,12" />
+                <StackPanel x:Name="PanSecondaryNav" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</local:MyPageLeft>

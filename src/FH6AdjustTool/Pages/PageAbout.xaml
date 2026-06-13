@@ -1,0 +1,36 @@
+<local:MyPageRight x:Class="PageAbout"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:local="clr-namespace:QING.UIKIT"
+                   PanScroll="PanBack">
+    <local:MyScrollViewer x:Name="PanBack"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="28,24,28,14">
+
+            <!-- 许可与版权 -->
+            <local:MyCard x:Name="CardDisclaimer" Title="版权与免责声明" Margin="0,0,0,15">
+                <StackPanel Margin="20,40,20,18">
+                    <TextBlock Text="免责声明：" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
+                    <TextBlock Text="1. 本软件为第三方开源调校工具，与微软公司 (Microsoft)、Xbox、Turn 10 或 Playground Games 官方无任何隶属或关联关系。Forza Horizon® 为微软公司注册商标。" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource ColorBrushGray3}" LineHeight="1.5" Margin="0,0,0,10" />
+                    <TextBlock Text="2. 本程序内嵌的物理调校算法部分推导自社区公开资料和玩家公开的公式常数，仅供竞速游戏爱好者交流和学习调优使用。" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource ColorBrushGray3}" LineHeight="1.5" Margin="0,0,0,14" />
+                    
+                    <Border Height="1" Background="{DynamicResource ColorBrushBorder}" Margin="0,0,0,12" />
+
+                    <TextBlock Text="开源许可证：" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
+                    <TextBlock Text="本软件遵循 MIT 许可协议开源，界面库 QING.UIKIT 遵循 GPLv3 许可协议。" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource ColorBrushGray3}" LineHeight="1.5" />
+                </StackPanel>
+            </local:MyCard>
+
+            <!-- 鸣谢与研究 -->
+            <local:MyCard x:Name="CardCredits" Title="致谢与数据来源" Margin="0">
+                <StackPanel Margin="20,40,20,18">
+                    <local:MyListItem Title="社区研究员 Kireth" Info="提供了早期的地平线 6 物理机制反馈与物理调校常数校验。" IsHitTestVisible="False" Height="50" />
+                    <local:MyListItem Title="ForzaTune Pro 公式推导" Info="弹簧自然频率（K = M × (2πf)²）及阻尼常数公式的重要参考来源。" IsHitTestVisible="False" Height="50" />
+                    <local:MyListItem Title="界面框架 QING.UIKIT" Info="基于 Meloong-Git/PCL 重构整理的 VB.NET / WPF 界面控件模板库。" IsHitTestVisible="False" Height="50" />
+                </StackPanel>
+            </local:MyCard>
+
+        </StackPanel>
+    </local:MyScrollViewer>
+</local:MyPageRight>

@@ -1,0 +1,48 @@
+{
+  "appId":    "com.tunelab.forzah6",
+  "appName":  "TuneLab",
+  "webDir":   "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext":     false,
+    "allowNavigation": [
+      "generativelanguage.googleapis.com",
+      "api.anthropic.com",
+      "api.openai.com",
+      "api.x.ai",
+      "gemini.google.com",
+      "aistudio.google.com"
+    ]
+  },
+  "android": {
+    "buildOptions": {
+      "keystorePath":        "tunelab.keystore",
+      "keystoreAlias":       "tunelab",
+      "keystorePassword":    "",
+      "keystoreAliasPassword": ""
+    },
+    "minWebViewVersion": 80,
+    "allowMixedContent":    false,
+    "captureInput":         true,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration":      0,
+      "launchAutoHide":          true,
+      "backgroundColor":         "#080a0f",
+      "androidSplashResourceName": "splash",
+      "showSpinner":             false
+    },
+    "StatusBar": {
+      "style":           "DARK",
+      "backgroundColor": "#080a0f",
+      "overlaysWebView": true
+    },
+    "Keyboard": {
+      "resize":        "body",
+      "resizeOnFullScreen": true
+    },
+    "Haptics": {}
+  }
+}

@@ -1,0 +1,46 @@
+<!-- android/app/src/main/res/values/styles.xml -->
+<resources>
+
+  <!-- Base application theme -->
+  <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+
+    <!-- Match our dark background — no flash of white on launch -->
+    <item name="android:windowBackground">@color/background</item>
+    <item name="android:colorBackground">@color/background</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+
+    <!-- Edge-to-edge: app draws under status bar and nav bar -->
+    <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+
+    <!-- Smooth animations -->
+    <item name="android:windowContentTransitions">true</item>
+    <item name="android:windowActivityTransitions">true</item>
+
+    <!-- Hardware acceleration -->
+    <item name="android:hardwareAccelerated">true</item>
+
+    <!-- No title bar -->
+    <item name="windowNoTitle">true</item>
+    <item name="windowActionBar">false</item>
+
+    <!-- Fullscreen — we manage our own insets -->
+    <item name="android:windowFullscreen">false</item>
+
+    <!--
+      120Hz hint: preferMinimalPostProcessing removes color/tone mapping
+      pipeline steps that can cap refresh rate on some displays.
+      Set in Activity, not theme, but this is the companion config.
+    -->
+
+  </style>
+
+  <!-- Splash screen theme — shows before WebView loads -->
+  <style name="SplashTheme" parent="AppTheme">
+    <item name="android:windowBackground">@drawable/splash</item>
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowFullscreen">true</item>
+    <item name="android:windowContentOverlay">@null</item>
+  </style>
+
+</resources>

@@ -1,0 +1,550 @@
+<local:MyPageRight x:Class="PageTuner"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:local="clr-namespace:QING.UIKIT"
+                   PanScroll="PanBack">
+    <local:MyScrollViewer x:Name="PanBack"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="28,24,28,14">
+            
+            <!-- 第一张大卡片：参数配置 (可折叠) -->
+            <local:MyCard Title="车辆规格与参数配置" CanSwap="True" Margin="0,0,0,18">
+                <StackPanel Margin="20,40,20,18">
+                    <!-- 分区1：车辆基础配置 -->
+                    <TextBlock Text="🚗 车辆基础配置" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,12" />
+                    
+                    <!-- 搜索与选择 -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="20" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <!-- 搜索 -->
+                        <Grid Grid.Column="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <local:MyTextBox x:Name="TxtCarSearch" Height="34" VerticalAlignment="Center" HintText="搜索车辆库 (快速匹配规格)" />
+                            <local:MyButton x:Name="BtnCarSearch" Grid.Column="1" Text="搜索" Margin="8,0,0,0" Padding="14,6" Height="34" VerticalAlignment="Center" />
+                        </Grid>
+                        <!-- 选择 -->
+                        <local:MyComboBox x:Name="ComboCar" Grid.Column="2" Height="34" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- 手动规格参数 -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="15" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="15" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="15" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="车重" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="12" />
+                            <local:MyTextBox x:Name="TxtWeight" Height="34" Text="3000" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="前后配重比 (F%)" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="12" />
+                            <local:MyTextBox x:Name="TxtWeightDist" Height="34" Text="50" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="4">
+                            <TextBlock Text="驱动类型" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="12" />
+                            <local:MyComboBox x:Name="ComboDriveType" Height="34" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="6">
+                            <TextBlock Text="性能级别 (PI)" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="12" />
+                            <local:MyTextBox x:Name="TxtPi" Height="34" Text="700" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="15" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="15" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="15" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="轮胎配方" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="12" />
+                            <local:MyComboBox x:Name="ComboCompound" Height="34" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="等级" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="12" />
+                            <local:MyComboBox x:Name="ComboClass" Height="34" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="4">
+                            <TextBlock Text="前轮规格 (如 245/35R19)" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="11" />
+                            <local:MyTextBox x:Name="TxtTireWF" Height="34" Text="245/35R19" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="6">
+                            <TextBlock Text="后轮规格 (如 275/35R19)" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="11" />
+                            <local:MyTextBox x:Name="TxtTireWR" Height="34" Text="275/35R19" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Height="1" Background="{DynamicResource ColorBrushBorder}" Margin="0,12,0,16" />
+
+                    <!-- 分区2：调校模式选择 -->
+                    <TextBlock Text="⚙️ 调校计算模式" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,12" />
+                    <UniformGrid Columns="4" Rows="2" Margin="0,0,0,12">
+                        <local:MyButton x:Name="BtnModeRace" Text="🏁 赛道日 (Race)" Margin="4" Padding="8,8" />
+                        <local:MyButton x:Name="BtnModeTouge" Text="⛰ 山路 (Touge)" Margin="4" Padding="8,8" />
+                        <local:MyButton x:Name="BtnModeWangan" Text="🌃 湾岸 (Wangan)" Margin="4" Padding="8,8" />
+                        <local:MyButton x:Name="BtnModeDrift" Text="💨 漂移 (Drift)" Margin="4" Padding="8,8" />
+                        <local:MyButton x:Name="BtnModeDrag" Text="⚡ 直线 (Drag)" Margin="4" Padding="8,8" />
+                        <local:MyButton x:Name="BtnModeRally" Text="🪨 拉力 (Rally)" Margin="4" Padding="8,8" />
+                        <local:MyButton x:Name="BtnModeRain" Text="🌧 雨天 (Rain)" Margin="4" Padding="8,8" />
+                        <local:MyButton x:Name="BtnModeGeneral" Text="🔧 通用 (General)" Margin="4" Padding="8,8" />
+                    </UniformGrid>
+
+                    <Border Height="1" Background="{DynamicResource ColorBrushBorder}" Margin="0,12,0,16" />
+
+                    <!-- 分区3：转向与硬度手感微调 -->
+                    <TextBlock Text="🎛 手感微调" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,12" />
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="手感平衡 (转向不足 ↔ 转向过度)" Margin="0,0,0,6" Foreground="{DynamicResource ColorBrushGray3}" FontSize="12" />
+                            <local:MySlider x:Name="SliderBalance" Value="50" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="手感侵略性 (舒适/柔软 ↔ 激进/硬朗)" Margin="0,0,0,6" Foreground="{DynamicResource ColorBrushGray3}" FontSize="12" />
+                            <local:MySlider x:Name="SliderAggression" Value="50" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Height="1" Background="{DynamicResource ColorBrushBorder}" Margin="0,12,0,16" />
+
+                    <!-- 分区4：高级功能设置 -->
+                    <TextBlock Text="🛠 高级调优选项" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,12" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- 变速箱高级 -->
+                        <StackPanel Grid.Column="0">
+                            <local:MyCheckBox x:Name="ChkGearing" Text="启用变速箱齿轮比计算 (Gearing)" Checked="False" Margin="0,0,0,10" />
+                            <StackPanel x:Name="PanelGearingInputs" Visibility="Collapsed">
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="红线转速 (Redline RPM)" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="11" />
+                                        <local:MyTextBox x:Name="TxtRedlineRpm" Height="34" Text="7000" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="最大扭矩转速 (Peak RPM)" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="11" />
+                                        <local:MyTextBox x:Name="TxtPeakRpm" Height="34" Text="5000" />
+                                    </StackPanel>
+                                </Grid>
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="最大扭矩 (Max Torque)" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="11" />
+                                        <local:MyTextBox x:Name="TxtMaxTorque" Height="34" Text="350" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="最高设计时速" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="11" />
+                                        <local:MyTextBox x:Name="TxtTopspeed" Height="34" Text="150" />
+                                    </StackPanel>
+                                </Grid>
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="前进挡数 (4-10)" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="11" />
+                                        <local:MyTextBox x:Name="TxtGears" Height="34" Text="6" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="直线加速赛程" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="11" />
+                                        <local:MyComboBox x:Name="ComboDragDist" Height="34" />
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- 空气动力学高级 -->
+                        <StackPanel Grid.Column="2">
+                            <local:MyCheckBox x:Name="ChkAero" Text="启用空气动力学套件 (Aero)" Checked="False" Margin="0,0,0,10" />
+                            <StackPanel x:Name="PanelAeroInputs" Visibility="Collapsed">
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="前下压力" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="11" />
+                                        <local:MyTextBox x:Name="TxtAeroF" Height="34" Text="100" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="后下压力" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="11" />
+                                        <local:MyTextBox x:Name="TxtAeroR" Height="34" Text="150" />
+                                    </StackPanel>
+                                </Grid>
+                                <StackPanel Margin="0,0,0,8">
+                                    <TextBlock Text="风阻系数 (Drag Cd)" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="11" />
+                                    <local:MyTextBox x:Name="TxtDragCd" Height="34" Text="0.35" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- 确定计算按钮 -->
+                    <Border Height="1" Background="{DynamicResource ColorBrushBorder}" Margin="0,18,0,12" />
+                    <local:MyButton x:Name="BtnCalculate" Text="确定并计算调校方案" Height="36" ColorType="Highlight" HorizontalAlignment="Right" Padding="30,0" />
+                </StackPanel>
+            </local:MyCard>
+
+            <!-- 第二张大卡片：参数计算结果 (可折叠) -->
+            <local:MyCard Title="车辆各项调校结果" CanSwap="True" Margin="0">
+                <Grid Margin="20,40,20,18">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="15" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="28" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 调校命名与保存栏 -->
+                    <Grid Grid.Row="0" Grid.ColumnSpan="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <local:MyTextBox x:Name="TxtTuneName" Grid.Column="0" Height="34" HintText="给此调校命名 (例如：911 GT3 S1 街车)" />
+                        
+                        <local:MyButton x:Name="BtnSaveTune" Grid.Column="2" Text="💾 保存调校" Padding="20,6" Height="34" ColorType="Highlight" VerticalAlignment="Top" />
+                    </Grid>
+
+                    <!-- 左列 -->
+                    <StackPanel Grid.Row="2" Grid.Column="0">
+                        <!-- 分区1：轮胎与定位 -->
+                        <TextBlock Text="🔘 轮胎与定位 (Tires &amp; Alignment)" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,10" />
+                        <StackPanel Margin="0,0,0,10">
+                            <!-- 轮胎气压 -->
+                            <StackPanel Margin="0,0,0,15">
+                                <TextBlock Text="轮胎气压与规格" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,8" />
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="前胎气压" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutTirePressF" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="后胎气压" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutTirePressR" Grid.Column="1" Height="34" />
+                                </Grid>
+                            </StackPanel>
+                            <!-- 悬挂定位 -->
+                            <StackPanel Margin="0">
+                                <TextBlock Text="悬挂定位角度" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,8" />
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="前外倾角 (Camber)" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutCamberF" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="后外倾角 (Camber)" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutCamberR" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="前束角 (Toe)" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutToeF" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="后束角 (Toe)" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutToeR" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="主销后倾角 (Caster)" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutCaster" Grid.Column="1" Height="34" />
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                        <TextBlock x:Name="TipTires" Text="轮胎气压提示..." TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource ColorBrushGray2}" Margin="4,8,0,10" />
+                        <TextBlock x:Name="TipAlignment" Text="定位调整提示..." TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource ColorBrushGray2}" Margin="4,4,0,0" />
+
+                        <Border Height="1" Background="{DynamicResource ColorBrushBorder}" Margin="0,15" />
+
+                        <!-- 分区3：悬挂阻尼 -->
+                        <TextBlock Text="⚡ 悬挂阻尼 (Damping)" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,10" />
+                        <StackPanel Margin="0,0,0,10">
+                            <!-- 回弹阻尼 -->
+                            <StackPanel Margin="0,0,0,15">
+                                <TextBlock Text="回弹阻尼 (Rebound)" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,8" />
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="前轮回弹" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutReboundF" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="后轮回弹" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutReboundR" Grid.Column="1" Height="34" />
+                                </Grid>
+                            </StackPanel>
+                            <!-- 收缩阻尼 -->
+                            <StackPanel Margin="0">
+                                <TextBlock Text="收缩阻尼 (Bump)" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,8" />
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="前轮收缩" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutBumpF" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="后轮收缩" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutBumpR" Grid.Column="1" Height="34" />
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                        <TextBlock x:Name="TipDamping" Text="阻尼系数调整提示..." TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource ColorBrushGray2}" Margin="4,8,0,0" />
+
+                        <!-- 分区5：变速箱齿轮比 (条件显示) -->
+                        <StackPanel x:Name="CardGearingResult" Visibility="Collapsed">
+                            <Border Height="1" Background="{DynamicResource ColorBrushBorder}" Margin="0,15" />
+                            <TextBlock Text="⚙️ 变速箱齿轮比 (Gearing ratios)" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,10" />
+                            <TextBlock Text="建议齿轮比配置" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
+                            <StackPanel x:Name="PanelGearingList" />
+                            <TextBlock x:Name="TipGearing" Text="齿轮比微调技巧提示..." TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource ColorBrushGray2}" Margin="4,8,0,0" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- 右列 -->
+                    <StackPanel Grid.Row="2" Grid.Column="2">
+                        <!-- 分区2：防倾杆与悬挂弹簧 -->
+                        <TextBlock Text="📐 防倾杆与悬挂弹簧 (ARB &amp; Springs)" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,10" />
+                        <StackPanel Margin="0,0,0,10">
+                            <!-- 防倾杆 -->
+                            <StackPanel Margin="0,0,0,15">
+                                <TextBlock Text="防倾杆 (Anti-Roll Bars)" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,8" />
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="前防倾杆" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutArbF" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="后防倾杆" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutArbR" Grid.Column="1" Height="34" />
+                                </Grid>
+                            </StackPanel>
+                            <!-- 弹簧与高度 -->
+                            <StackPanel Margin="0">
+                                <TextBlock Text="弹簧率与车高" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,8" />
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="前悬弹簧" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutSpringF" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="后悬弹簧" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutSpringR" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="前车身高度" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutRideF" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="后车身高度" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutRideR" Grid.Column="1" Height="34" />
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                        <TextBlock x:Name="TipArb" Text="防倾杆调整提示..." TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource ColorBrushGray2}" Margin="4,8,0,10" />
+                        <TextBlock x:Name="TipSpring" Text="弹簧高度提示..." TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource ColorBrushGray2}" Margin="4,4,0,0" />
+
+                        <Border Height="1" Background="{DynamicResource ColorBrushBorder}" Margin="0,15" />
+
+                        <!-- 分区4：制动与差速器锁 -->
+                        <TextBlock Text="🔒 制动与差速器锁 (Braking &amp; Differential)" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,10" />
+                        <StackPanel Margin="0,0,0,10">
+                            <!-- 制动系统 -->
+                            <StackPanel Margin="0,0,0,15">
+                                <TextBlock Text="制动系统 (Braking)" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,8" />
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="制动平衡 (Front Bias)" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutBrakeBal" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="制动压力 (Pressure)" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutBrakePress" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="循迹刹车推荐等级" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutBrakeTrail" Grid.Column="1" Height="34" />
+                                </Grid>
+                            </StackPanel>
+                            <!-- 差速器 -->
+                            <StackPanel Margin="0">
+                                <TextBlock Text="差速器锁定比 (Differential)" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,8" />
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="前轮加速/减速" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutDiffF" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="后轮加速/减速" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutDiffR" Grid.Column="1" Height="34" />
+                                </Grid>
+                                <Grid x:Name="RowDiffC" Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="中央动力分配" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                    <local:MyTextBox x:Name="OutDiffC" Grid.Column="1" Height="34" />
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                        <TextBlock x:Name="TipBraking" Text="制动技巧提示..." TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource ColorBrushGray2}" Margin="4,8,0,10" />
+                        <TextBlock x:Name="TipDiff" Text="差速器锁配置提示..." TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource ColorBrushGray2}" Margin="4,4,0,0" />
+
+                        <!-- 分区6：空气动力学下压力 (条件显示) -->
+                        <StackPanel x:Name="CardAeroResult" Visibility="Collapsed">
+                            <Border Height="1" Background="{DynamicResource ColorBrushBorder}" Margin="0,15" />
+                            <TextBlock Text="🍃 空气动力学下压力 (Aero forces)" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,10" />
+                            <TextBlock Text="下压力与风阻分配" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,8" />
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="150" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="前下压力" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                <local:MyTextBox x:Name="OutAeroF" Grid.Column="1" Height="34" />
+                            </Grid>
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="150" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="后下压力" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                <local:MyTextBox x:Name="OutAeroR" Grid.Column="1" Height="34" />
+                            </Grid>
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="150" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="下压力平衡 (F / R)" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                                <local:MyTextBox x:Name="OutAeroBalance" Grid.Column="1" Height="34" />
+                            </Grid>
+                            <TextBlock x:Name="TipAero" Text="空气动力下压力设置说明..." TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource ColorBrushGray2}" Margin="4,8,0,0" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </local:MyCard>
+
+        </StackPanel>
+    </local:MyScrollViewer>
+</local:MyPageRight>

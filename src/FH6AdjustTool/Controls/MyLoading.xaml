@@ -1,0 +1,42 @@
+<Grid
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" x:Name="PanBack" mc:Ignorable="d" x:Class="MyLoading"
+             MinWidth="50" MinHeight="50" Background="{StaticResource ColorBrushSemiTransparent}">
+    <Grid.RowDefinitions>
+        <RowDefinition Height="1*"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="1*"/>
+    </Grid.RowDefinitions>
+    <Grid UseLayoutRounding="False" SnapsToDevicePixels="False" Width="60" Height="47" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Row="1">
+        <!-- 旋转加载环 -->
+        <Path Name="PathSpinner" Visibility="Collapsed" Stretch="Uniform" Height="28" Width="28" StrokeThickness="3.5"
+              Data="M20,4 A16,16 0 1,1 4,20"
+              Stroke="{Binding Foreground, ElementName=PanBack}" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+            <Path.RenderTransform>
+                <RotateTransform x:Name="SpinTransform" Angle="0" />
+            </Path.RenderTransform>
+            <Path.Triggers>
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="SpinTransform"
+                                             Storyboard.TargetProperty="Angle"
+                                             From="0" To="360" Duration="0:0:1"
+                                             RepeatBehavior="Forever" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Path.Triggers>
+        </Path>
+
+        <!-- 错误状态图标 -->
+        <Path Visibility="Collapsed" Opacity="0" Name="PathError" Stretch="Uniform" Fill="{Binding Foreground, ElementName=PanBack}" Width="17" Height="17" Data="F1 M2,0 L0,2 8,10 0,18 2,20 10,12 18,20 20,18 12,10 20,2 18,0 10,8 2,0Z" Margin="4,23,0,0" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top" >
+            <Path.RenderTransform>
+                <ScaleTransform ScaleX="0.6" ScaleY="0.6" />
+            </Path.RenderTransform>
+        </Path>
+    </Grid>
+    <TextBlock x:Name="LabText" Text="Loading" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="{Binding Foreground, ElementName=PanBack}" FontSize="16" Margin="0,10,0,0" Grid.Row="2"/>
+</Grid>
+

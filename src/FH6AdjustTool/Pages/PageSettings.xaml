@@ -1,0 +1,139 @@
+<local:MyPageRight x:Class="PageSettings"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:local="clr-namespace:QING.UIKIT"
+                   PanScroll="PanBack">
+    <local:MyScrollViewer x:Name="PanBack"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="28,24,28,14">
+            
+            <!-- 计量单位 -->
+            <local:MyCard x:Name="CardUnits" Title="计量单位" Margin="0,0,0,15">
+                <StackPanel Margin="20,40,20,18">
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="重量单位" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                        <local:MyComboBox x:Name="ComboUnitWeight" Grid.Column="1" Height="34" />
+                    </Grid>
+
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="速度单位" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                        <local:MyComboBox x:Name="ComboUnitSpeed" Grid.Column="1" Height="34" />
+                    </Grid>
+
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="胎压单位" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                        <local:MyComboBox x:Name="ComboUnitPressure" Grid.Column="1" Height="34" />
+                    </Grid>
+
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="悬挂弹簧单位" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                        <local:MyComboBox x:Name="ComboUnitSprings" Grid.Column="1" Height="34" />
+                    </Grid>
+                </StackPanel>
+            </local:MyCard>
+
+            <!-- AI 智能服务配置 -->
+            <local:MyCard x:Name="CardApiKey" Title="AI 智能接口配置" Margin="0,0,0,15">
+                <StackPanel Margin="20,40,20,18">
+                    <!-- 接口供应商 -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="AI 供应商" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                        <local:MyComboBox x:Name="ComboAiProvider" Grid.Column="1" Height="34" />
+                    </Grid>
+
+                    <!-- API 密钥 -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="LabApiKeyTitle" Text="API 密钥 (API Key)" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                        <local:MyTextBox x:Name="TxtAiApiKey" Grid.Column="1" Height="34" />
+                    </Grid>
+
+                    <!-- 自定义接口地址 (仅在 OpenAI-Compatible 时显示) -->
+                    <Grid x:Name="GridCustomUrl" Margin="0,0,0,14" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="接口地址 (Base URL)" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                        <local:MyTextBox x:Name="TxtAiCustomUrl" Grid.Column="1" Height="34" HintText="例如 https://api.deepseek.com/v1" />
+                    </Grid>
+
+                    <!-- 运行模型 -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="运行模型" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                        <local:MyComboBox x:Name="ComboAiModel" Grid.Column="1" Height="34" />
+                    </Grid>
+
+                    <!-- 自定义模型名称 (仅在选择自定义模型时显示) -->
+                    <Grid x:Name="GridModelCustom" Margin="0,0,0,14" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="自定义模型名称" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                        <local:MyTextBox x:Name="TxtAiModelCustom" Grid.Column="1" Height="34" HintText="例如 deepseek-chat" />
+                    </Grid>
+
+                    <!-- 测试与状态 -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="LabKeyStatus" Text="未检测到配置密钥" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrushGray2}" FontSize="12" />
+                        <local:MyLoading x:Name="LoadKey" Grid.Column="1" Height="28" Width="28" AutoRun="False" Margin="12,0" VerticalAlignment="Center" />
+                        <local:MyButton x:Name="BtnTestKey" Grid.Column="2" Text="测试并保存配置" Padding="14,6" Height="34" ColorType="Highlight" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <Border Height="1" Background="{DynamicResource ColorBrushBorder}" Margin="0,5,0,12" />
+                    <TextBlock Text="注意：" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrushGray3}" FontSize="11" Margin="0,0,0,4" />
+                    <TextBlock Text="1. 您的 API Key 将只存储在本地电脑上，不会发送给除您指定的官方或代理接口以外的任何第三方服务器。" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource ColorBrushGray2}" Margin="0,0,0,2" />
+                    <TextBlock Text="2. Gemini 提供商免费额度高，如需配置国内的 DeepSeek / 百度 / 阿里等大模型，请选择 OpenAI 兼容接口，并配置正确的 API 密钥和 Base URL。" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource ColorBrushGray2}" />
+                </StackPanel>
+            </local:MyCard>
+
+            <!-- 主题色设置 -->
+            <local:MyCard x:Name="CardTheme" Title="软件主题个性化" Margin="0" Visibility="Collapsed">
+                <StackPanel Margin="20,40,20,18">
+                    <TextBlock Text="界面颜色与主题切换" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
+                    <TextBlock Text="切换软件的强调色与配色系统：" FontSize="12" Foreground="{DynamicResource ColorBrushGray3}" Margin="0,0,0,12" />
+                    
+                    <WrapPanel>
+                        <local:MyButton x:Name="BtnThemeNext" Text="切换下一个主题色" Margin="0,0,12,12" Padding="16,8" />
+                        <local:MyButton x:Name="BtnThemeReset" Text="恢复默认炫酷蓝" Margin="0,0,12,12" Padding="16,8" />
+                    </WrapPanel>
+                </StackPanel>
+            </local:MyCard>
+
+        </StackPanel>
+    </local:MyScrollViewer>
+</local:MyPageRight>

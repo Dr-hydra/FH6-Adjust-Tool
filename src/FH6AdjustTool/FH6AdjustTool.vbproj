@@ -1,0 +1,75 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>QING.UIKIT</RootNamespace>
+    <AssemblyName>FH6AdjustTool</AssemblyName>
+    <MyType>Custom</MyType>
+    <StartupObject>QING.UIKIT.Application</StartupObject>
+
+    <OptionExplicit>On</OptionExplicit>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionStrict>Off</OptionStrict>
+    <OptionInfer>On</OptionInfer>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
+    <NoWarn>41999;42016;42017;42018;42019;42020;42021;42022;42032;42036;42314</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ApplicationDefinition Include="Application.xaml" />
+    <Compile Remove="Controls\MySliderDot.xaml.vb" />
+    <Page Remove="Controls\MySliderDot.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Collections.Concurrent" />
+    <Import Include="System.ComponentModel" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.IO" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Net" />
+    <Import Include="System.Net.Http" />
+    <Import Include="System.Text" />
+    <Import Include="System.Threading" />
+    <Import Include="System.Threading.Tasks" />
+    <Import Include="System.Windows" />
+    <Import Include="System.Windows.Controls" />
+    <Import Include="System.Windows.Data" />
+    <Import Include="System.Windows.Documents" />
+    <Import Include="System.Windows.Input" />
+    <Import Include="System.Windows.Media" />
+    <Import Include="System.Windows.Media.Animation" />
+    <Import Include="System.Windows.Media.Effects" />
+    <Import Include="System.Windows.Media.Imaging" />
+    <Import Include="Microsoft.Win32" />
+    <Import Include="QING.Core" />
+    <Import Include="QING.Core.Extensions" />
+    <Import Include="QING.Core.Wpf" />
+    <Import Include="QING.Core.Wpf.Extensions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\cars.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QING.Core\Shared\QING.Core.csproj" />
+    <ProjectReference Include="..\QING.Core\Wpf\QING.Core.Wpf.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\**\*" />
+    <Resource Include="Resources\Font.ttf" />
+  </ItemGroup>
+
+</Project>

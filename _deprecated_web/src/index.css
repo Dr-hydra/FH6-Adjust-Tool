@@ -1,0 +1,108 @@
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Root ── */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  background: #080a0f;
+  color: #e2e4f0;
+  /* Improve text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── 120Hz / High refresh rate ──────────────────────────────────────────────
+   These tell the browser compositor to hint the OS for high frame rate.
+   On a Snapdragon 8 Elite (S25 Ultra) this keeps animations at 120fps.     */
+* {
+  /* Let browser decide optimal rendering layer */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Promote animated elements to their own compositor layer */
+button, [role="button"] {
+  will-change: transform;
+  transform: translateZ(0);
+  cursor: pointer;
+}
+
+/* Smooth scrolling everywhere at high fps */
+* {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Safe area insets (notch / punch-hole / nav bar) ────────────────────────
+   S25 Ultra has a top punch-hole and bottom nav bar gesture area.
+   env(safe-area-inset-*) gives us the exact pixel values.                  */
+#root {
+  padding-top:    env(safe-area-inset-top,    0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left:   env(safe-area-inset-left,   0px);
+  padding-right:  env(safe-area-inset-right,  0px);
+}
+
+/* Fixed elements (headers, bottom bars) need the same treatment */
+.safe-top    { padding-top:    env(safe-area-inset-top,    0px); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
+
+/* ── Scrollbars ── */
+::-webkit-scrollbar       { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2e3340; border-radius: 3px; }
+
+/* ── Inputs ── */
+input, select, textarea {
+  color-scheme: dark;
+  font-family: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+/* Prevent zoom on input focus (Android) */
+input[type="number"],
+input[type="text"],
+select,
+textarea {
+  font-size: 16px; /* Must be ≥16px to prevent iOS/Android auto-zoom */
+}
+
+/* ── Animations — 120Hz optimised ── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Sheet animation — matches Material Design motion */
+.sheet-enter {
+  animation: slideUp 280ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+/* ── Touch feedback ── */
+button:active {
+  transform: scale(0.97) translateZ(0);
+  transition: transform 60ms ease-out;
+}
+
+/* ── Typography fallback ── */
+body {
+  font-family: 'Roboto', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}

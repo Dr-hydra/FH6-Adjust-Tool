@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TuneLab</string>
+    <string name="title_activity_main">TuneLab</string>
+    <string name="package_name">com.tunelab.forzah6</string>
+    <string name="custom_url_scheme">com.tunelab.forzah6</string>
+</resources>

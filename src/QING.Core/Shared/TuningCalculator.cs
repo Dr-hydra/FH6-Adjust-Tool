@@ -155,8 +155,8 @@ public static class TuningCalculator
         double rRide = rRideCm;
         
         // Damping
-        double fSpringPhys = s.SpringsUnit == "lbs/in" ? fSpring * 175.127 / 9.0 : fSpring * 1000.0 / 9.0;
-        double rSpringPhys = s.SpringsUnit == "lbs/in" ? rSpring * 175.127 / 9.0 : rSpring * 1000.0 / 9.0;
+        double fSpringPhys = s.SpringsUnit == "lbs/in" ? fSpring * 175.127 : fSpring * 1000.0 / 9.0;
+        double rSpringPhys = s.SpringsUnit == "lbs/in" ? rSpring * 175.127 : rSpring * 1000.0 / 9.0;
         double critDampF = 2.0 * Math.Sqrt(cwFL * fSpringPhys);
         double critDampR = 2.0 * Math.Sqrt(cwRL * rSpringPhys);
         

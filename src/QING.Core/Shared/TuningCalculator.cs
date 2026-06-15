@@ -446,7 +446,7 @@ public static class TuningCalculator
                 if (effGears < 2) effGears = 2;
                 
                 double rawFD = (redline * circumferenceM * 3.6) / (launchKmh * 60.0);
-                finalDrive = Math.Round(Math.Max(2.00, Math.Min(8.00, rawFD)), 2);
+                finalDrive = Math.Round(Math.Max(2.20, Math.Min(8.00, rawFD)), 2);
                 
                 double targetTotal1 = isAWD ? 15.0 - 1.5 * Math.Sqrt(torqueNm / wKg) :
                                       isFWD ? 13.5 - 2.5 * Math.Sqrt(torqueNm / wKg) :
@@ -476,7 +476,7 @@ public static class TuningCalculator
                 
                 double nominalTopRatio = numGears >= 8 ? 0.65 : numGears >= 6 ? 0.75 : 0.82;
                 double rawFD = totalRatio / nominalTopRatio;
-                finalDrive = Math.Round(Math.Max(2.00, Math.Min(8.00, rawFD)), 2);
+                finalDrive = Math.Round(Math.Max(2.20, Math.Min(8.00, rawFD)), 2);
                 
                 double targetTotal1 = isAWD ? 14.0 - 2.0 * Math.Sqrt(torqueNm / wKg) :
                                       isFWD ? 12.5 - 3.0 * Math.Sqrt(torqueNm / wKg) :

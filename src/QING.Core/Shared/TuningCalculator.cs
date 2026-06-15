@@ -136,7 +136,7 @@ public static class TuningCalculator
             double FORZA_SCALE = 9.0;
             if (s.SpringsUnit == "lbs/in") return Math.Round(kNm / 175.127, 1);
             if (s.SpringsUnit == "n/mm") return Math.Round(kNm / 1000.0 * FORZA_SCALE, 1);
-            if (s.SpringsUnit == "kgf/mm") return Math.Round(kNm / (9806.65 * 1000.0) * FORZA_SCALE, 2);
+            if (s.SpringsUnit == "kgf/mm") return Math.Round(kNm / 9806.65 * FORZA_SCALE, 2);
             return Math.Round(kNm / 175.127, 1);
         };
         
@@ -145,8 +145,9 @@ public static class TuningCalculator
         
         // Feel adjuster: balance slider shifts ratio
         double balanceMod = (s.FeelBalance - 50.0) / 200.0; // -0.25 to 0.25
-        fSpring = Math.Round(fSpring * (1.0 + balanceMod), 1);
-        rSpring = Math.Round(rSpring * (1.0 - balanceMod), 1);
+        int decimals = s.SpringsUnit == "kgf/mm" ? 2 : 1;
+        fSpring = Math.Round(fSpring * (1.0 + balanceMod), decimals);
+        rSpring = Math.Round(rSpring * (1.0 - balanceMod), decimals);
         
         // Ride Height
         double fRideCm = isDrift ? 15.5 : isRally ? 20.0 : isSnow ? 22.0 : isDrag ? 15.0 : 15.0;
@@ -155,8 +156,12 @@ public static class TuningCalculator
         double rRide = rRideCm;
         
         // Damping
-        double fSpringPhys = s.SpringsUnit == "lbs/in" ? fSpring * 175.127 : fSpring * 1000.0 / 9.0;
-        double rSpringPhys = s.SpringsUnit == "lbs/in" ? rSpring * 175.127 : rSpring * 1000.0 / 9.0;
+        double fSpringPhys = s.SpringsUnit == "lbs/in" ? fSpring * 175.127 :
+                             s.SpringsUnit == "kgf/mm" ? fSpring * 9806.65 / 9.0 :
+                                                         fSpring * 1000.0 / 9.0;
+        double rSpringPhys = s.SpringsUnit == "lbs/in" ? rSpring * 175.127 :
+                             s.SpringsUnit == "kgf/mm" ? rSpring * 9806.65 / 9.0 :
+                                                         rSpring * 1000.0 / 9.0;
         double critDampF = 2.0 * Math.Sqrt(cwFL * fSpringPhys);
         double critDampR = 2.0 * Math.Sqrt(cwRL * rSpringPhys);
         
@@ -438,36 +443,57 @@ public static class TuningCalculator
                 double launchKmh = dist == "half" ? 130.0 : dist == "top" ? topKmh : 96.0;
                 int maxGears = dist == "top" ? 6 : dist == "half" ? 5 : 4;
                 int effGears = Math.Min(s.Gears, maxGears);
+                if (effGears < 2) effGears = 2;
                 
                 double rawFD = (redline * circumferenceM * 3.6) / (launchKmh * 60.0);
-                finalDrive = Math.Round(Math.Max(3.20, Math.Min(6.50, rawFD)), 2);
+                finalDrive = Math.Round(Math.Max(2.00, Math.Min(8.00, rawFD)), 2);
                 
-                double launchMod = isRWD ? 0.72 : isAWD ? 0.80 : 0.85;
-                double ratio1 = Math.Round(Math.Min(2.8, redline / peak * launchMod), 2);
+                double targetTotal1 = isAWD ? 15.0 - 1.5 * Math.Sqrt(torqueNm / wKg) :
+                                      isFWD ? 13.5 - 2.5 * Math.Sqrt(torqueNm / wKg) :
+                                              13.0 - 2.0 * Math.Sqrt(torqueNm / wKg);
+                double ratio1 = targetTotal1 / finalDrive;
+                ratio1 = Math.Round(Math.Max(2.20, Math.Min(4.80, ratio1)), 2);
+
                 double ratioN = Math.Round((topKmh * 60.0) / (redline * circumferenceM * 3.6) * finalDrive, 2);
                 double clampedN = Math.Round(Math.Max(0.70, Math.Min(1.20, ratioN)), 2);
                 
-                double step = Math.Pow(clampedN / ratio1, 1.0 / (effGears - 1.0));
+                double p = effGears >= 7 ? 1.4 : 1.0;
                 ratios = new double[effGears];
                 for (int i = 0; i < effGears; i++)
                 {
-                    ratios[i] = Math.Round(ratio1 * Math.Pow(step, i), 2);
+                    double x = effGears > 1 ? (double)i / (effGears - 1) : 0.0;
+                    double y = 1.0 - Math.Pow(1.0 - x, p);
+                    ratios[i] = Math.Round(ratio1 * Math.Pow(clampedN / ratio1, y), 2);
                 }
             }
             else
             {
-                double rawFD = (redline * circumferenceM * 3.6) / (topKmh * 60.0);
-                finalDrive = Math.Round(Math.Max(2.50, Math.Min(6.50, rawFD)), 2);
+                double targetRpm = (redline + peak) / 2.0;
+                double totalRatio = (targetRpm * circumferenceM * 3.6) / (topKmh * 60.0);
                 
-                double ratio1 = isAWD ? 2.50 : isFWD ? 2.80 : 2.20;
-                double ratioN = Math.Round((topKmh * 60.0) / (redline * circumferenceM * 3.6) * finalDrive, 2);
-                double clampedN = Math.Round(Math.Max(0.75, Math.Min(1.10, ratioN)), 2);
+                int numGears = s.Gears;
+                if (numGears < 2) numGears = 2;
                 
-                double step = Math.Pow(clampedN / ratio1, 1.0 / (s.Gears - 1.0));
-                ratios = new double[s.Gears];
-                for (int i = 0; i < s.Gears; i++)
+                double nominalTopRatio = numGears >= 8 ? 0.65 : numGears >= 6 ? 0.75 : 0.82;
+                double rawFD = totalRatio / nominalTopRatio;
+                finalDrive = Math.Round(Math.Max(2.00, Math.Min(8.00, rawFD)), 2);
+                
+                double targetTotal1 = isAWD ? 14.0 - 2.0 * Math.Sqrt(torqueNm / wKg) :
+                                      isFWD ? 12.5 - 3.0 * Math.Sqrt(torqueNm / wKg) :
+                                              11.5 - 2.5 * Math.Sqrt(torqueNm / wKg);
+                double ratio1 = targetTotal1 / finalDrive;
+                ratio1 = Math.Round(Math.Max(2.20, Math.Min(4.50, ratio1)), 2);
+                
+                double ratioN = totalRatio / finalDrive;
+                double clampedN = Math.Round(Math.Max(0.50, Math.Min(1.20, ratioN)), 2);
+                
+                double p = numGears >= 7 ? 1.4 : 1.0;
+                ratios = new double[numGears];
+                for (int i = 0; i < numGears; i++)
                 {
-                    ratios[i] = Math.Round(ratio1 * Math.Pow(step, i), 2);
+                    double x = numGears > 1 ? (double)i / (numGears - 1) : 0.0;
+                    double y = 1.0 - Math.Pow(1.0 - x, p);
+                    ratios[i] = Math.Round(ratio1 * Math.Pow(clampedN / ratio1, y), 2);
                 }
             }
             

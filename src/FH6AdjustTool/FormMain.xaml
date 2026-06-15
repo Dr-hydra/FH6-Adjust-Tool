@@ -94,6 +94,8 @@
                                         LogoScale="0.72" Logo="F1 M2,0 L0,2 8,10 0,18 2,20 10,12 18,20 20,18 12,10 20,2 18,0 10,8 2,0Z" />
                     <local:MyIconButton x:Name="BtnTitleMin" HorizontalAlignment="Right" Height="28" Width="28" VerticalAlignment="Center" Margin="0,0,44,0" Theme="White"
                                         LogoScale="0.72" Logo="F1 M0,0 h15 v2 h-15 v-2 Z" />
+                    <local:MyIconButton x:Name="BtnTitlePin" HorizontalAlignment="Right" Height="28" Width="28" VerticalAlignment="Center" Margin="0,0,76,0" Theme="White"
+                                        LogoScale="0.72" Logo="{x:Static local:Logo.IconButtonPin}" Opacity="0.5" ToolTip="窗口置顶" />
                     <Grid x:Name="PanTitleMain" HorizontalAlignment="Left" Width="{Binding ActualWidth, ElementName=PanTitle, Mode=OneWay}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*" />

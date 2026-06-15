@@ -29,7 +29,7 @@ Public Class PageSavedTunes
         End If
         SavedTunesDatabase.SaveTune(tune)
         TxtImportCode.Text = ""
-        Hint("已导入调校 "" & tune.Name & """, HintType.Green)
+        Hint("已导入调校 “" & tune.Name & "”", HintType.Green)
         RefreshTunesList()
     End Sub
 

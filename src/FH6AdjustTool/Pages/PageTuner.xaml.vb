@@ -7,6 +7,7 @@ Public Class PageTuner
 
     Private ActiveMode As String = "General"
     Private IsInitializing As Boolean = True
+    Private IsLoadedOnce As Boolean = False
     Private CurrentResult As TuningResult
 
     Public Sub New()
@@ -51,12 +52,15 @@ Public Class PageTuner
     End Sub
 
     Public Sub PageTuner_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
-        ' Load cars to Combo
-        RefreshCarCombo()
-        
-        ' Trigger initial calculation only on first load
-        If CurrentResult Is Nothing Then
-            Recalculate()
+        ' Load cars to Combo only once
+        If Not IsLoadedOnce Then
+            IsLoadedOnce = True
+            RefreshCarCombo()
+            
+            ' Trigger initial calculation only on first load
+            If CurrentResult Is Nothing Then
+                Recalculate()
+            End If
         End If
 
         ' Hook up AI Enhancement button click in sidebar

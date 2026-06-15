@@ -128,6 +128,17 @@ Public Class FormMain
         WindowState = WindowState.Minimized
     End Sub
 
+    Private Sub BtnTitlePin_Click(sender As Object, e As EventArgs) Handles BtnTitlePin.Click
+        Topmost = Not Topmost
+        If Topmost Then
+            BtnTitlePin.Opacity = 1.0
+            BtnTitlePin.ToolTip = "取消置顶"
+        Else
+            BtnTitlePin.Opacity = 0.5
+            BtnTitlePin.ToolTip = "窗口置顶"
+        End If
+    End Sub
+
     Private Sub FormDragMove(sender As Object, e As MouseButtonEventArgs) Handles PanTitle.MouseLeftButtonDown, PanMsg.MouseLeftButtonDown
         If e.ClickCount >= 2 Then
             WindowState = If(WindowState = WindowState.Maximized, WindowState.Normal, WindowState.Maximized)

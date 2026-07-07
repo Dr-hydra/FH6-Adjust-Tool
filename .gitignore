@@ -6,3 +6,5 @@ obj/
 *.nupkg
 artifacts/
 logs/
+publish_*/
+FH6AdjustTool_v*.zip

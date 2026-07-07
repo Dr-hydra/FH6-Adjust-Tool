@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FH6 Telemetry</title>
+  <link rel="stylesheet" href="./telemetry-dashboard.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <h1>遥测分析</h1>
+        <div id="statusText" class="muted">未连接</div>
+      </div>
+      <div class="connection">
+        <label>
+          <span>地址</span>
+          <input id="hostInput" value="127.0.0.1" spellcheck="false">
+        </label>
+        <label>
+          <span>端口</span>
+          <input id="portInput" value="5400" inputmode="numeric">
+        </label>
+        <button id="startBtn" class="primary">开始</button>
+        <button id="stopBtn">停止</button>
+        <button id="contextBtn">同步调校</button>
+        <button id="gateBtn">标记起终点</button>
+      </div>
+    </header>
+
+    <section class="metrics">
+      <article>
+        <span>速度</span>
+        <strong id="speedValue">0</strong>
+        <small>km/h</small>
+      </article>
+      <article>
+        <span>转速</span>
+        <strong id="rpmValue">0</strong>
+        <small>rpm</small>
+      </article>
+      <article>
+        <span>档位</span>
+        <strong id="gearValue">N</strong>
+        <small id="inputValue">油 0% / 刹 0%</small>
+      </article>
+      <article>
+        <span>调校</span>
+        <strong id="tuneValue">未命名</strong>
+        <small id="carValue">未选择车辆</small>
+      </article>
+      <article>
+        <span>当前圈</span>
+        <strong id="currentLapValue">--</strong>
+        <small id="gameLapValue">游戏计时</small>
+      </article>
+    </section>
+
+    <section class="workspace">
+      <article class="panel route-panel">
+        <div class="panel-title">
+          <h2>路线</h2>
+          <div class="replay-tools">
+            <button id="playReplayBtn">回放</button>
+            <input id="replaySlider" type="range" min="0" max="0" value="0">
+          </div>
+        </div>
+        <canvas id="routeCanvas" width="960" height="520"></canvas>
+      </article>
+
+      <aside class="stack">
+        <article class="panel">
+          <div class="panel-title">
+            <h2>圈速</h2>
+            <button id="refreshBtn">刷新</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>模式</th>
+                  <th>圈</th>
+                  <th>时间</th>
+                  <th>调校</th>
+                </tr>
+              </thead>
+              <tbody id="lapsBody"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-title">
+            <h2>调校对比</h2>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>调校</th>
+                  <th>最佳</th>
+                  <th>圈数</th>
+                </tr>
+              </thead>
+              <tbody id="compareBody"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-title">
+            <h2>问题标记</h2>
+            <button id="issueBtn">标记</button>
+          </div>
+          <ul id="issuesList" class="issues"></ul>
+        </article>
+      </aside>
+    </section>
+  </main>
+  <script src="./telemetry-dashboard.js"></script>
+</body>
+</html>

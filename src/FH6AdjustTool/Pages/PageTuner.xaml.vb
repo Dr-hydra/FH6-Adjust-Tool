@@ -2,6 +2,7 @@ Imports System.Windows
 Imports System.Windows.Controls
 Imports System.Text.Json
 Imports QING.Core
+Imports QING.Core.Telemetry
 
 Public Class PageTuner
 
@@ -859,6 +860,31 @@ Public Class PageTuner
             Case "Gearing" : Return "齿轮比"
             Case Else : Return section
         End Select
+    End Function
+
+    Public Function GetTelemetryContext() As TelemetrySessionContext
+        Dim tuneName = TxtTuneName.Text.Trim()
+        Dim carText As String = If(ComboCar.SelectedItem IsNot Nothing, ComboCar.SelectedItem.ToString(), "")
+        Dim saved = If(String.IsNullOrWhiteSpace(tuneName),
+            Nothing,
+            SavedTunesDatabase.Tunes.FirstOrDefault(Function(t) t.Name.Equals(tuneName, StringComparison.OrdinalIgnoreCase)))
+
+        Dim tuneId As String
+        If saved IsNot Nothing Then
+            tuneId = saved.Id
+        ElseIf Not String.IsNullOrWhiteSpace(tuneName) Then
+            tuneId = "draft:" & tuneName
+        Else
+            tuneId = "draft:" & ActiveMode
+            tuneName = "未命名调校"
+        End If
+
+        Return New TelemetrySessionContext() With {
+            .TuneId = tuneId,
+            .TuneName = tuneName,
+            .CarName = carText,
+            .Source = "Tuner"
+        }
     End Function
 
 End Class

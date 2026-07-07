@@ -167,6 +167,7 @@ Public Class MyRadioButton
     Private Const AnimationTimeOfMouseIn As Integer = 90 '鼠标指向动画长度
     Private Const AnimationTimeOfMouseOut As Integer = 150 '鼠标移出动画长度
     Private Const AnimationTimeOfCheck As Integer = 120 '勾选状态变更动画长度
+
     Private Sub RefreshColor(Optional obj = Nothing, Optional e = Nothing) Handles Me.MouseEnter, Me.MouseLeave, Me.Loaded
         Try
             If IsLoaded AndAlso AniControlEnabled = 0 AndAlso Not False.Equals(e) Then '防止默认属性变更触发动画，若强制不执行动画，则 e 为 False
@@ -175,9 +176,10 @@ Public Class MyRadioButton
                     Case ColorState.White
                         If Checked Then
                             '勾选
+                            Dim checkedBrush = If(ThemeNow = 5, "ColorBrush1", "ColorBrush3")
                             AniStart({
-                                         AaColor(ShapeLogo, Shapes.Path.FillProperty, "ColorBrush3", AnimationTimeOfCheck),
-                                         AaColor(LabText, TextBlock.ForegroundProperty, "ColorBrush3", AnimationTimeOfCheck)
+                                         AaColor(ShapeLogo, Shapes.Path.FillProperty, checkedBrush, AnimationTimeOfCheck),
+                                         AaColor(LabText, TextBlock.ForegroundProperty, checkedBrush, AnimationTimeOfCheck)
                                     }, "MyRadioButton Checked " & Uuid)
                             AniStart(AaColor(Me, BackgroundProperty, New MyColor(255, 255, 255) - Background, AnimationTimeOfCheck), "MyRadioButton Color " & Uuid)
                         ElseIf IsMouseDown Then
@@ -235,8 +237,9 @@ Public Class MyRadioButton
                     Case ColorState.White
                         If Checked Then
                             Background = New MyColor(255, 255, 255)
-                            ShapeLogo.SetResourceReference(Shapes.Path.FillProperty, "ColorBrush3")
-                            LabText.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush3")
+                            Dim checkedBrush = If(ThemeNow = 5, "ColorBrush1", "ColorBrush3")
+                            ShapeLogo.SetResourceReference(Shapes.Path.FillProperty, checkedBrush)
+                            LabText.SetResourceReference(TextBlock.ForegroundProperty, checkedBrush)
                         Else
                             Background = ColorSemiTransparent
                             ShapeLogo.Fill = New MyColor(255, 255, 255)
@@ -261,4 +264,3 @@ Public Class MyRadioButton
     End Sub
 
 End Class
-

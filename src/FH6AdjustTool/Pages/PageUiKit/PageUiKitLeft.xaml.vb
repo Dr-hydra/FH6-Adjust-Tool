@@ -27,6 +27,8 @@ Public Class PageUiKitLeft
             Select Case page
                 Case UiKitDemoPage.SavedTunes
                     LabNavTitle.Text = "保存的调校"
+                Case UiKitDemoPage.Telemetry
+                    LabNavTitle.Text = "遥测分析"
                 Case UiKitDemoPage.Settings
                     LabNavTitle.Text = "参数设置"
                 Case UiKitDemoPage.About
@@ -55,6 +57,8 @@ Public Class PageUiKitLeft
         
         If TypeOf rightPage Is PageSavedTunes Then
             navItems = CType(rightPage, PageSavedTunes).GetSecondaryNavItems()
+        ElseIf TypeOf rightPage Is PageTelemetry Then
+            navItems = CType(rightPage, PageTelemetry).GetSecondaryNavItems()
         ElseIf TypeOf rightPage Is PageSettings Then
             navItems = CType(rightPage, PageSettings).GetSecondaryNavItems()
         ElseIf TypeOf rightPage Is PageAbout Then

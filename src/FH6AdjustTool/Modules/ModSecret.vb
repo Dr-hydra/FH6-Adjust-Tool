@@ -30,11 +30,19 @@ Public Module ModSecret
         ThemeNow = newTheme
         ApplyThemePalette(ThemeNow)
         Color1 = New MyColor().FromHSL2(ColorHue, ColorSat * 0.2, 25 + ColorLightAdjust * 0.3)
-        Color2 = New MyColor().FromHSL2(ColorHue, ColorSat, 45 + ColorLightAdjust)
-        Color3 = New MyColor().FromHSL2(ColorHue, ColorSat, 55 + ColorLightAdjust)
-        Color4 = New MyColor().FromHSL2(ColorHue, ColorSat, 65 + ColorLightAdjust)
-        Color5 = New MyColor().FromHSL2(ColorHue, ColorSat, 80 + ColorLightAdjust * 0.4)
-        Color6 = New MyColor().FromHSL2(ColorHue, ColorSat, 91 + ColorLightAdjust * 0.1)
+        If ThemeNow = 5 Then
+            Color2 = New MyColor().FromHSL2(ColorHue, 30, 45)
+            Color3 = New MyColor().FromHSL2(ColorHue, 40, 60)
+            Color4 = New MyColor().FromHSL2(ColorHue, 40, 75)
+            Color5 = New MyColor().FromHSL2(ColorHue, ColorSat, 80)
+            Color6 = New MyColor().FromHSL2(ColorHue, ColorSat, 91)
+        Else
+            Color2 = New MyColor().FromHSL2(ColorHue, ColorSat, 45 + ColorLightAdjust)
+            Color3 = New MyColor().FromHSL2(ColorHue, ColorSat, 55 + ColorLightAdjust)
+            Color4 = New MyColor().FromHSL2(ColorHue, ColorSat, 65 + ColorLightAdjust)
+            Color5 = New MyColor().FromHSL2(ColorHue, ColorSat, 80 + ColorLightAdjust * 0.4)
+            Color6 = New MyColor().FromHSL2(ColorHue, ColorSat, 91 + ColorLightAdjust * 0.1)
+        End If
         Color7 = New MyColor().FromHSL2(ColorHue, ColorSat, 95)
         Color8 = New MyColor().FromHSL2(ColorHue, ColorSat, 97)
         ColorBg0 = Color4 * 0.4 + Color5 * 0.4 + ColorGray4 * 0.2

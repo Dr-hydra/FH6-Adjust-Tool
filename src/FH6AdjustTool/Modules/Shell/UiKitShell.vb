@@ -1,8 +1,9 @@
 Public Enum UiKitDemoPage
     Tuner = 0
     SavedTunes = 1
-    Settings = 2
-    About = 3
+    Telemetry = 2
+    Settings = 3
+    About = 4
 End Enum
 
 Public Class UiKitShellHost
@@ -17,6 +18,8 @@ Public Module UiKitShellText
                 Return "调校计算"
             Case UiKitDemoPage.SavedTunes
                 Return "保存的调校"
+            Case UiKitDemoPage.Telemetry
+                Return "遥测分析"
             Case UiKitDemoPage.Settings
                 Return "软件设置"
             Case UiKitDemoPage.About

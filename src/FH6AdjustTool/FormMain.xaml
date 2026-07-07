@@ -81,7 +81,7 @@
                     <RowDefinition />
                 </Grid.RowDefinitions>
 
-                <Canvas x:Name="ImgBack" Grid.Row="1" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="LowQuality" />
+                <Image x:Name="ImgBack" Grid.Row="1" Stretch="UniformToFill" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="LowQuality" />
 
                 <Grid x:Name="PanTitle" Height="48">
                     <Grid.Background>
@@ -109,8 +109,9 @@
                         <StackPanel Grid.Column="1" x:Name="PanTitleSelect" HorizontalAlignment="Left" Orientation="Horizontal" Height="27" VerticalAlignment="Center" Margin="13,0">
                             <local:MyRadioButton x:Name="BtnTitleSelect0" Text="调校计算" Tag="0" Margin="5,0" Checked="True" Padding="2,0" LogoScale="0.9" Logo="M128 192h768v128H128zM128 448h768v128H128zM128 704h768v128H128z" />
                             <local:MyRadioButton x:Name="BtnTitleSelect1" Text="保存的调校" Tag="1" Margin="5,0" Padding="2,0" LogoScale="0.9" Logo="M192 128 h512 l128 128 v576 H192 z M320 256 v192 h256 V256 z M320 576 v192 h384 V576 z" />
-                            <local:MyRadioButton x:Name="BtnTitleSelect2" Text="参数设置" Tag="2" Margin="5,0" Padding="2,0" LogoScale="0.9" Logo="{x:Static local:Logo.IconButtonSetup}" />
-                            <local:MyRadioButton x:Name="BtnTitleSelect3" Text="关于项目" Tag="3" Margin="5,0" Padding="2,0" LogoScale="0.9" Logo="M448 128h128v128H448zM448 384h128v512H448z" />
+                            <local:MyRadioButton x:Name="BtnTitleSelect2" Text="遥测分析" Tag="2" Margin="5,0" Padding="2,0" LogoScale="0.9" Logo="M128 768h128V384H128v384zM448 768h128V192H448v576zM768 768h128V512H768v256z" />
+                            <local:MyRadioButton x:Name="BtnTitleSelect3" Text="参数设置" Tag="3" Margin="5,0" Padding="2,0" LogoScale="0.9" Logo="{x:Static local:Logo.IconButtonSetup}" />
+                            <local:MyRadioButton x:Name="BtnTitleSelect4" Text="关于项目" Tag="4" Margin="5,0" Padding="2,0" LogoScale="0.9" Logo="M448 128h128v128H448zM448 384h128v512H448z" />
                         </StackPanel>
                     </Grid>
                     <Grid x:Name="PanTitleInner" Visibility="Collapsed" Margin="-16,0,0,0" Opacity="0" HorizontalAlignment="Left" Width="{Binding ActualWidth, ElementName=PanTitle, Mode=OneWay}">

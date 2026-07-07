@@ -82,6 +82,7 @@ Public Class MySlider
     Private Sub DragStart(sender As Object, e As MouseButtonEventArgs) Handles Me.MouseLeftButtonDown
         e.Handled = True '防止 ScrollViewer 失焦问题
         DragControl = Me
+        CaptureMouse()
         RefreshColor()
         FrmMain.DragDoing()
         AniStart({
@@ -89,6 +90,21 @@ Public Class MySlider
             }, "MySlider Scale " & Uuid)
         RefreshPopup()
         AniStop("MySlider KeyPopup " & Uuid)
+        DragDoing()
+    End Sub
+
+    Private Sub DragMove(sender As Object, e As MouseEventArgs) Handles Me.MouseMove
+        If Equals(DragControl, Me) Then
+            DragDoing()
+        End If
+    End Sub
+
+    Private Sub DragEnd(sender As Object, e As MouseButtonEventArgs) Handles Me.MouseLeftButtonUp
+        If Equals(DragControl, Me) Then
+            ReleaseMouseCapture()
+            DragControl = Nothing
+            DragStop()
+        End If
     End Sub
     Public Sub DragDoing()
         Dim Percent As Double = ((Mouse.GetPosition(PanMain).X - ShapeDot.Width / 2) / (ActualWidth - ShapeDot.Width)).Clamp(0, 1)

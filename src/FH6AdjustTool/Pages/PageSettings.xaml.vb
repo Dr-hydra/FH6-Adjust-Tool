@@ -70,6 +70,13 @@ Public Class PageSettings
             LabKeyStatus.Text = "已配置 API 密钥 (未测试)"
         End If
 
+        ' Refresh personalization settings
+        SettingService.RefreshSettings(Me)
+        UpdateHslPanelVisibility()
+        UpdateSliderLabels()
+        UpdateBackgroundLabels()
+        LoadBackgroundImagePath()
+
         IsInitializing = False
     End Sub
 
@@ -256,23 +263,118 @@ Public Class PageSettings
         End Try
     End Sub
 
-    ' Theme Color Toggle
-    Private Sub BtnThemeNext_Click(sender As Object, e As EventArgs) Handles BtnThemeNext.Click
-        ThemeRefresh((ThemeNow + 1) Mod 5)
+    Private Sub Preset_Check(sender As Object, e As EventArgs) Handles _
+        RadioTheme0.Check, RadioTheme1.Check, RadioTheme5.Check, _
+        RadioTheme7.Check, RadioTheme9.Check, RadioTheme10.Check, _
+        RadioThemeCustom.Check
+
+        If FrmMain Is Nothing Then Return
+        
+        ' Update HSL panel visibility
+        UpdateHslPanelVisibility()
+        
+        ' Apply the selected theme colors
+        Dim themeId = Settings.Get(Of Integer)("UiLauncherTheme")
+        ThemeRefresh(themeId)
         ThemeRefreshMain()
-        Hint("主题强调色已切换。", HintType.Green)
     End Sub
 
-    Private Sub BtnThemeReset_Click(sender As Object, e As EventArgs) Handles BtnThemeReset.Click
-        ThemeRefresh(0)
-        ThemeRefreshMain()
-        Hint("已恢复默认蓝色主题。", HintType.Blue)
+    Private Sub Slider_Change(sender As Object, user As Boolean) Handles _
+        SliderHue.Change, SliderSat.Change, SliderLight.Change
+
+        If FrmMain Is Nothing Then Return
+
+        UpdateSliderLabels()
+
+        ' If Custom theme is active, apply HSL sliders immediately
+        Dim themeId = Settings.Get(Of Integer)("UiLauncherTheme")
+        If themeId = 14 Then
+            ThemeRefresh(14)
+            ThemeRefreshMain()
+        End If
+    End Sub
+
+    Private Sub SliderWindowTrans_Change(sender As Object, user As Boolean) Handles SliderWindowTrans.Change
+        If FrmMain Is Nothing Then Return
+        UpdateBackgroundLabels()
+        FrmMain.UpdateWindowOpacity()
+    End Sub
+
+    Private Sub SliderControlOpacity_Change(sender As Object, user As Boolean) Handles SliderControlOpacity.Change
+        If FrmMain Is Nothing Then Return
+        UpdateBackgroundLabels()
+        FrmMain.UpdateControlOpacity()
+    End Sub
+
+    Private Sub SliderBgOpacity_Change(sender As Object, user As Boolean) Handles SliderBgOpacity.Change
+        If FrmMain Is Nothing Then Return
+        UpdateBackgroundLabels()
+        FrmMain.LoadBackgroundImage()
+    End Sub
+
+    Private Sub SliderBgClarity_Change(sender As Object, user As Boolean) Handles SliderBgClarity.Change
+        If FrmMain Is Nothing Then Return
+        UpdateBackgroundLabels()
+        FrmMain.LoadBackgroundImage()
+    End Sub
+
+    Private Sub BtnSelectBg_Click(sender As Object, e As MouseButtonEventArgs) Handles BtnSelectBg.Click
+        Dim openFileDialog As New OpenFileDialog()
+        openFileDialog.Filter = "图像文件 (*.jpg;*.jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp|所有文件 (*.*)|*.*"
+        If openFileDialog.ShowDialog() = True Then
+            Settings.Set("UiBackgroundImagePath", openFileDialog.FileName)
+            LabImagePath.Text = openFileDialog.FileName
+            If FrmMain IsNot Nothing Then
+                FrmMain.LoadBackgroundImage()
+            End If
+        End If
+    End Sub
+
+    Private Sub BtnResetBg_Click(sender As Object, e As MouseButtonEventArgs) Handles BtnResetBg.Click
+        Settings.Set("UiBackgroundImagePath", "")
+        LabImagePath.Text = "使用默认内置背景图"
+        If FrmMain IsNot Nothing Then
+            FrmMain.LoadBackgroundImage()
+        End If
+    End Sub
+
+    Private Sub UpdateHslPanelVisibility()
+        If PanCustomHSL Is Nothing OrElse RadioThemeCustom Is Nothing Then Return
+        PanCustomHSL.Visibility = If(RadioThemeCustom.Checked, Visibility.Visible, Visibility.Collapsed)
+    End Sub
+
+    Private Sub UpdateSliderLabels()
+        If SliderHue Is Nothing OrElse SliderSat Is Nothing OrElse SliderLight Is Nothing Then Return
+        LabHue.Text = "色调: " & CInt(SliderHue.Value)
+        LabSat.Text = "饱和度: " & CInt(SliderSat.Value) & "%"
+        LabLight.Text = "亮度微调: " & (CInt(SliderLight.Value) - 20)
+    End Sub
+
+    Private Sub UpdateBackgroundLabels()
+        If SliderWindowTrans Is Nothing OrElse SliderBgOpacity Is Nothing OrElse SliderBgClarity Is Nothing OrElse SliderControlOpacity Is Nothing Then Return
+        LabWindowTrans.Text = "窗口不透明度: " & CInt(SliderWindowTrans.Value) & "%"
+        LabControlOpacity.Text = "控件不透明度: " & CInt(SliderControlOpacity.Value) & "%"
+        LabBgOpacity.Text = "背景图不透明度: " & CInt(SliderBgOpacity.Value) & "%"
+        LabBgClarity.Text = "背景图片清晰度: " & CInt(SliderBgClarity.Value) & "%"
+    End Sub
+
+    Private Sub LoadBackgroundImagePath()
+        If LabImagePath Is Nothing Then Return
+        Dim path = Settings.Get(Of String)("UiBackgroundImagePath")
+        If String.IsNullOrWhiteSpace(path) Then
+            LabImagePath.Text = "使用默认内置背景图"
+        Else
+            LabImagePath.Text = path
+        End If
     End Sub
 
     Public Function GetSecondaryNavItems() As List(Of Tuple(Of String, FrameworkElement))
         Dim list As New List(Of Tuple(Of String, FrameworkElement))()
         list.Add(New Tuple(Of String, FrameworkElement)("计量单位", CardUnits))
+        list.Add(New Tuple(Of String, FrameworkElement)("遥测数据", CardTelemetry))
         list.Add(New Tuple(Of String, FrameworkElement)("智能接口", CardApiKey))
+        list.Add(New Tuple(Of String, FrameworkElement)("主题配色", CardThemeColors))
+        list.Add(New Tuple(Of String, FrameworkElement)("背景磨砂", CardThemeBackground))
         Return list
     End Function
 End Class

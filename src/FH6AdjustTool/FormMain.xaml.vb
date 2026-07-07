@@ -11,6 +11,15 @@ Public Class FormMain
     Private PageAbout As PageAbout
     Public PageNav As PageUiKitLeft
     Private IsSizeSaveable As Boolean = False
+    Private IsChangingPage As Boolean = False
+
+    Private ReadOnly ActiveSubPages As New Dictionary(Of UiKitDemoPage, UiKitSubPage) From {
+        {UiKitDemoPage.Tuner, UiKitSubPage.TunerMain},
+        {UiKitDemoPage.SavedTunes, UiKitSubPage.SavedTunesSaveImport},
+        {UiKitDemoPage.Telemetry, UiKitSubPage.TelemetryDashboard},
+        {UiKitDemoPage.Settings, UiKitSubPage.SettingsUnits},
+        {UiKitDemoPage.About, UiKitSubPage.AboutFeatures}
+    }
 
     Public PageLeft As MyPageLeft
     Public PageRight As MyPageRight
@@ -37,7 +46,7 @@ Public Class FormMain
         PanMainRight.Child = PageTuner
         PageRight = PageTuner
         PageHost.CurrentPage = UiKitDemoPage.Tuner
-        PageNav.Configure(UiKitDemoPage.Tuner, PageTuner)
+        PageNav.Configure(UiKitDemoPage.Tuner, UiKitSubPage.TunerMain)
         PageTuner.PageState = MyPageRight.PageStates.ContentStay
     End Sub
 
@@ -253,20 +262,75 @@ Public Class FormMain
     End Sub
 
     Public Sub PageChange(page As UiKitDemoPage)
-        If PageHost.CurrentPage = page Then Return
-        PageHost.LastPage = PageHost.CurrentPage
-        PageHost.CurrentPage = page
+        If IsChangingPage Then Return
+        Dim subPage = ActiveSubPages(page)
+        SubPageChange(subPage)
+    End Sub
 
-        Dim target = GetRightPage(page)
-        
-        ' Update sidebar active key and status
-        Dim apiKey = Settings.Get(Of String)("GeminiApiKey", "")
-        Dim aiReady = Not String.IsNullOrWhiteSpace(apiKey)
-        PageNav.UpdateStatus(CarDatabase.CarsList.Count, True, aiReady, "Gemini 2.5")
-        
-        PageNav.Configure(page, target)
-        PageChangeAnim(target)
-        Hint("已导航至：" & UiKitShellText.GetPageTitle(page))
+    Public Sub SubPageChange(subPage As UiKitSubPage)
+        If IsChangingPage Then Return
+        IsChangingPage = True
+        Try
+            Dim primaryPage = GetPrimaryPage(subPage)
+            ActiveSubPages(primaryPage) = subPage
+            UpdatePrimaryTitleCheck(primaryPage)
+
+            Dim apiKey = Settings.Get(Of String)("GeminiApiKey", "")
+            Dim aiReady = Not String.IsNullOrWhiteSpace(apiKey)
+            PageNav.UpdateStatus(CarDatabase.CarsList.Count, True, aiReady, "Gemini 2.5")
+            PageNav.Configure(primaryPage, subPage)
+
+            Dim target = GetRightPage(primaryPage)
+            ApplySubPage(target, subPage)
+
+            PageHost.LastPage = PageHost.CurrentPage
+            PageHost.CurrentPage = primaryPage
+
+            If PanMainRight.Child Is target Then
+                BtnExtraBack.ShowRefresh()
+            Else
+                PageChangeAnim(target)
+            End If
+
+            Hint("已切换到：" & UiKitShellText.GetSubPageTitle(subPage))
+        Finally
+            IsChangingPage = False
+        End Try
+    End Sub
+
+    Private Function GetPrimaryPage(subPage As UiKitSubPage) As UiKitDemoPage
+        Select Case subPage
+            Case UiKitSubPage.SavedTunesSaveImport, UiKitSubPage.SavedTunesShareImport, UiKitSubPage.SavedTunesList
+                Return UiKitDemoPage.SavedTunes
+            Case UiKitSubPage.TelemetryDashboard
+                Return UiKitDemoPage.Telemetry
+            Case UiKitSubPage.SettingsUnits, UiKitSubPage.SettingsSaveImport, UiKitSubPage.SettingsTelemetry, UiKitSubPage.SettingsAi, UiKitSubPage.SettingsThemeColors, UiKitSubPage.SettingsBackground
+                Return UiKitDemoPage.Settings
+            Case UiKitSubPage.AboutFeatures, UiKitSubPage.AboutDisclaimer, UiKitSubPage.AboutCredits
+                Return UiKitDemoPage.About
+            Case Else
+                Return UiKitDemoPage.Tuner
+        End Select
+    End Function
+
+    Private Sub ApplySubPage(target As MyPageRight, subPage As UiKitSubPage)
+        If TypeOf target Is PageSavedTunes Then
+            CType(target, PageSavedTunes).ApplySubPage(subPage)
+        ElseIf TypeOf target Is PageSettings Then
+            CType(target, PageSettings).ApplySubPage(subPage)
+        ElseIf TypeOf target Is PageAbout Then
+            CType(target, PageAbout).ApplySubPage(subPage)
+        End If
+    End Sub
+
+    Private Sub UpdatePrimaryTitleCheck(primaryPage As UiKitDemoPage)
+        Dim radioButtons = {BtnTitleSelect0, BtnTitleSelect1, BtnTitleSelect2, BtnTitleSelect3, BtnTitleSelect4}
+        For Each btn In radioButtons
+            If btn IsNot Nothing Then
+                Dim btnTag = CType(Val(btn.Tag), UiKitDemoPage)
+                btn.SetChecked(btnTag = primaryPage, False, False)
+            End If
+        Next
     End Sub
 
     Private Function GetRightPage(page As UiKitDemoPage) As MyPageRight

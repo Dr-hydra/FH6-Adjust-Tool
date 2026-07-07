@@ -76,6 +76,7 @@ Public Class PageSettings
         UpdateSliderLabels()
         UpdateBackgroundLabels()
         LoadBackgroundImagePath()
+        UpdateGameSavePathLabel()
 
         IsInitializing = False
     End Sub
@@ -207,6 +208,48 @@ Public Class PageSettings
     Private Sub TxtAiApiKey_ValidatedTextChanged(sender As Object, e As RoutedEventArgs) Handles TxtAiApiKey.ValidatedTextChanged
         If IsInitializing Then Return
         Settings.Set("AiApiKey", TxtAiApiKey.Text.Trim())
+    End Sub
+
+    Private Sub TxtGameSavePath_ValidatedTextChanged(sender As Object, e As RoutedEventArgs) Handles TxtGameSavePath.ValidatedTextChanged
+        If IsInitializing Then Return
+        Settings.Set("GameSavePath", TxtGameSavePath.Text.Trim())
+        UpdateGameSavePathLabel()
+    End Sub
+
+    Private Sub BtnSelectGameSavePath_Click(sender As Object, e As MouseButtonEventArgs) Handles BtnSelectGameSavePath.Click
+        Dim configured = Settings.Get(Of String)("GameSavePath", "")
+        Dim resolved = SaveTuneImportService.ResolveDefaultSavePath()
+        Dim initial = If(Directory.Exists(configured), configured, If(Directory.Exists(resolved), resolved, "C:\"))
+        Dim dialog As New OpenFolderDialog With {
+            .Title = "选择 FH6 存档目录",
+            .InitialDirectory = initial
+        }
+        If dialog.ShowDialog() Then
+            Settings.Set("GameSavePath", dialog.FolderName)
+            TxtGameSavePath.Text = dialog.FolderName
+            UpdateGameSavePathLabel()
+            Hint("已设置存档目录。", HintType.Green)
+        End If
+    End Sub
+
+    Private Sub BtnClearGameSavePath_Click(sender As Object, e As MouseButtonEventArgs) Handles BtnClearGameSavePath.Click
+        Settings.Set("GameSavePath", "")
+        TxtGameSavePath.Text = ""
+        UpdateGameSavePathLabel()
+        Hint("已恢复自动识别存档目录。", HintType.Blue)
+    End Sub
+
+    Private Sub BtnOpenGameSavePath_Click(sender As Object, e As MouseButtonEventArgs) Handles BtnOpenGameSavePath.Click
+        Try
+            Dim path = GetEffectiveGameSavePath()
+            If Directory.Exists(path) Then
+                Process.Start(New ProcessStartInfo With {.FileName = path, .UseShellExecute = True})
+            Else
+                Hint("当前存档目录不存在：" & path, HintType.Red)
+            End If
+        Catch ex As Exception
+            Hint("打开存档目录失败：" & ex.Message, HintType.Red)
+        End Try
     End Sub
 
     ' Save & Test AI Config
@@ -368,9 +411,35 @@ Public Class PageSettings
         End If
     End Sub
 
+    Private Function GetEffectiveGameSavePath() As String
+        Dim configured = Settings.Get(Of String)("GameSavePath", "")
+        If Not String.IsNullOrWhiteSpace(configured) Then Return configured
+        Return SaveTuneImportService.ResolveDefaultSavePath()
+    End Function
+
+    Private Sub UpdateGameSavePathLabel()
+        If LabGameSaveResolved Is Nothing Then Return
+        Dim configured = Settings.Get(Of String)("GameSavePath", "")
+        Dim effective = GetEffectiveGameSavePath()
+        Dim mode = If(String.IsNullOrWhiteSpace(configured), "自动识别", "手动指定")
+        Dim exists = If(Directory.Exists(effective), "可用", "不存在")
+        LabGameSaveResolved.Text = $"当前识别目录（{mode}，{exists}）：{effective}"
+    End Sub
+
+    Public Sub ApplySubPage(subPage As UiKitSubPage)
+        CardUnits.Visibility = If(subPage = UiKitSubPage.SettingsUnits, Visibility.Visible, Visibility.Collapsed)
+        CardSaveImport.Visibility = If(subPage = UiKitSubPage.SettingsSaveImport, Visibility.Visible, Visibility.Collapsed)
+        CardTelemetry.Visibility = If(subPage = UiKitSubPage.SettingsTelemetry, Visibility.Visible, Visibility.Collapsed)
+        CardApiKey.Visibility = If(subPage = UiKitSubPage.SettingsAi, Visibility.Visible, Visibility.Collapsed)
+        CardThemeColors.Visibility = If(subPage = UiKitSubPage.SettingsThemeColors, Visibility.Visible, Visibility.Collapsed)
+        CardThemeBackground.Visibility = If(subPage = UiKitSubPage.SettingsBackground, Visibility.Visible, Visibility.Collapsed)
+        If PanBack IsNot Nothing Then PanBack.PerformVerticalOffsetDelta(-PanBack.VerticalOffset)
+    End Sub
+
     Public Function GetSecondaryNavItems() As List(Of Tuple(Of String, FrameworkElement))
         Dim list As New List(Of Tuple(Of String, FrameworkElement))()
         list.Add(New Tuple(Of String, FrameworkElement)("计量单位", CardUnits))
+        list.Add(New Tuple(Of String, FrameworkElement)("存档导入", CardSaveImport))
         list.Add(New Tuple(Of String, FrameworkElement)("遥测数据", CardTelemetry))
         list.Add(New Tuple(Of String, FrameworkElement)("智能接口", CardApiKey))
         list.Add(New Tuple(Of String, FrameworkElement)("主题配色", CardThemeColors))

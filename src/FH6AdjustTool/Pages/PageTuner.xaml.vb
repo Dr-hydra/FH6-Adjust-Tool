@@ -276,7 +276,7 @@ Public Class PageTuner
         Dim tune As New SavedTune()
         
         ' Check if a tune with the same name already exists
-        Dim existing = SavedTunesDatabase.Tunes.FirstOrDefault(Function(t) t.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+        Dim existing = SavedTunesDatabase.FindByName(name)
         If existing IsNot Nothing Then
             If MessageBox.Show("已存在名为 “" & name & "” 的调校。是否要覆盖它？", "确认覆盖", MessageBoxButton.OKCancel, MessageBoxImage.Question) = MessageBoxResult.OK Then
                 tune.Id = existing.Id
@@ -335,15 +335,15 @@ Public Class PageTuner
             
             ' Restore drive type
             Dim driveIndex = ComboDriveType.Items.Cast(Of String)().ToList().IndexOf(tune.State.DriveType)
-            If driveIndex <> -1 Then ComboDriveType.SelectedIndex = driveIndex
+            ComboDriveType.SelectedIndex = driveIndex
             
             ' Restore class
             Dim classIndex = ComboClass.Items.Cast(Of String)().ToList().IndexOf(tune.State.CarClass)
-            If classIndex <> -1 Then ComboClass.SelectedIndex = classIndex
+            ComboClass.SelectedIndex = classIndex
             
             ' Restore compound
             Dim compoundIndex = ComboCompound.Items.Cast(Of String)().ToList().IndexOf(tune.State.Compound)
-            If compoundIndex <> -1 Then ComboCompound.SelectedIndex = compoundIndex
+            ComboCompound.SelectedIndex = compoundIndex
             
             ' Restore basic inputs
             TxtWeight.Text = tune.State.Weight.ToString()
@@ -368,7 +368,7 @@ Public Class PageTuner
             TxtGears.Text = tune.State.Gears.ToString()
             
             Dim dragDistIndex = ComboDragDist.Items.Cast(Of String)().ToList().IndexOf(tune.State.DragDist)
-            If dragDistIndex <> -1 Then ComboDragDist.SelectedIndex = dragDistIndex
+            ComboDragDist.SelectedIndex = dragDistIndex
             
             ' Restore aero section
             ChkAero.Checked = tune.State.HasAero
@@ -867,7 +867,7 @@ Public Class PageTuner
         Dim carText As String = If(ComboCar.SelectedItem IsNot Nothing, ComboCar.SelectedItem.ToString(), "")
         Dim saved = If(String.IsNullOrWhiteSpace(tuneName),
             Nothing,
-            SavedTunesDatabase.Tunes.FirstOrDefault(Function(t) t.Name.Equals(tuneName, StringComparison.OrdinalIgnoreCase)))
+            SavedTunesDatabase.FindByName(tuneName))
 
         Dim tuneId As String
         If saved IsNot Nothing Then

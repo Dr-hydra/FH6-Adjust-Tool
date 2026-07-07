@@ -8,6 +8,10 @@
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>QING.UIKIT</RootNamespace>
     <AssemblyName>FH6AdjustTool</AssemblyName>
+    <Version>2.0.1</Version>
+    <AssemblyVersion>2.0.1.0</AssemblyVersion>
+    <FileVersion>2.0.1.0</FileVersion>
+    <InformationalVersion>2.0.1</InformationalVersion>
     <MyType>Custom</MyType>
     <StartupObject>QING.UIKIT.Application</StartupObject>
 
@@ -65,6 +69,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Content Include="Web\TelemetryDashboard\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\save-vehicle-database.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

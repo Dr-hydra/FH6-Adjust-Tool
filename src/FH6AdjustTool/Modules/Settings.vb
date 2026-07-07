@@ -25,6 +25,7 @@ Public Module Settings
         {"TelemetryUdpHost", "127.0.0.1"},
         {"TelemetryUdpPort", 5400},
         {"TelemetryAutoStart", False},
+        {"GameSavePath", ""},
         {"GeminiApiKey", ""},
         {"AiProvider", "Gemini"},
         {"AiModel", "3.1-flash"},

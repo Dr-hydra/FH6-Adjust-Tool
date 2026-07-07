@@ -7,6 +7,38 @@
                            VerticalScrollBarVisibility="Auto"
                            HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="28,24,28,14">
+
+            <!-- 从存档导入 -->
+            <local:MyCard x:Name="CardSaveImport" Title="从存档导入调校" Margin="0,0,0,15">
+                <StackPanel Margin="20,40,20,18">
+                    <TextBlock x:Name="LabSaveImportPath"
+                               Text="存档目录：正在读取..."
+                               TextWrapping="Wrap"
+                               FontSize="12"
+                               Foreground="{DynamicResource ColorBrushGray3}"
+                               Margin="0,0,0,12" />
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyButton x:Name="BtnScanSaveTunes" Text="扫描存档调校" Padding="12,8" ColorType="Highlight" />
+                        <local:MyButton x:Name="BtnImportSelectedSaveTunes" Grid.Column="2" Text="导入选中调校" Padding="12,8" />
+                    </Grid>
+                    <local:MyTextBox x:Name="TxtSaveTuneVehicleFilter"
+                                     HintText="按车型筛选，例如 Skyline / Mustang / 911"
+                                     Height="34"
+                                     Margin="0,0,0,10" />
+                    <TextBlock x:Name="LabSaveImportStatus"
+                               Text="会只读扫描 ContainersRoot 下的 Tuning_* 容器，并列出可导入的调校。"
+                               TextWrapping="Wrap"
+                               FontSize="11"
+                               Foreground="{DynamicResource ColorBrushGray3}"
+                               Margin="0,0,0,10" />
+                    <StackPanel x:Name="PanelSaveTuneCandidates" />
+                </StackPanel>
+            </local:MyCard>
             
             <!-- 导入分享码 -->
             <local:MyCard x:Name="CardImport" Title="导入分享码" Margin="0,0,0,15">
@@ -30,6 +62,37 @@
             <!-- 调校列表 -->
             <local:MyCard x:Name="CardList" Title="调校方案列表" Margin="0">
                 <StackPanel Margin="20,40,20,18">
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyTextBox x:Name="TxtTuneListVehicleFilter"
+                                         HintText="按车型筛选已保存调校"
+                                         Height="34" />
+                        <local:MyButton x:Name="BtnDeleteFilteredTunes"
+                                        Grid.Column="2"
+                                        Text="批量删除"
+                                        Height="34"
+                                        Padding="16,0,16,0"
+                                        ToolTip="进入批量删除选择模式" />
+                        <local:MyButton x:Name="BtnCancelBatchDelete"
+                                        Grid.Column="4"
+                                        Text="取消"
+                                        Height="34"
+                                        Padding="16,0,16,0"
+                                        Visibility="Collapsed"
+                                        ToolTip="退出批量删除选择模式" />
+                    </Grid>
+                    <TextBlock x:Name="LabTuneListStatus"
+                               Text=""
+                               TextWrapping="Wrap"
+                               FontSize="11"
+                               Foreground="{DynamicResource ColorBrushGray3}"
+                               Margin="0,0,0,10" />
                     <TextBlock x:Name="LabNoTunes" Text="暂无保存的调校方案。您可以在“调校计算”页面完成参数计算后，为方案命名并保存到此处。" 
                                Foreground="{DynamicResource ColorBrushGray2}" HorizontalAlignment="Center" Margin="0,30" FontSize="13" TextWrapping="Wrap" Visibility="Collapsed" />
                     

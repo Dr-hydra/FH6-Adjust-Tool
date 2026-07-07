@@ -3,9 +3,9 @@ Imports System.Runtime.CompilerServices
 
 Public Module ModBase
 
-    Public Const VersionBaseName As String = "1.2.0"
-    Public Const VersionCode As Integer = 2
-    Public Const VersionDisplay As String = "v1.2.0"
+    Public Const VersionBaseName As String = "2.0.1"
+    Public Const VersionCode As Integer = 201
+    Public Const VersionDisplay As String = "v2.0.1"
     Public Const CommitHash As String = ""
     Public Const BuildTypeDisplay As String = "UI Kit"
     Public Const VersionBranchMain As String = "main"

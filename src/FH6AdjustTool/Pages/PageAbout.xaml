@@ -8,12 +8,25 @@
                           HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="28,24,28,14">
 
+            <!-- 功能说明 -->
+            <local:MyCard x:Name="CardFeatures" Title="功能说明" Margin="0,0,0,15">
+                <StackPanel Margin="20,40,20,18">
+                    <TextBlock Text="FH6 调校工具将物理调校计算、AI 诊断、本地方案管理和实时遥测复盘整合到同一个桌面客户端中。" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource ColorBrushGray3}" LineHeight="1.5" Margin="0,0,0,12" />
+                    <local:MyListItem Title="存档调校导入" Info="只读扫描本地 FH6 存档中的 Tuning 容器，提取作者、调校名、车型和已识别滑块，勾选后导入为本地方案。" IsHitTestVisible="False" Height="50" />
+                    <local:MyListItem Title="遥测仪表盘" Info="监听游戏 Data Out UDP 数据，实时显示速度、转速、档位、油门、刹车、当前圈计时和路线轨迹。" IsHitTestVisible="False" Height="50" />
+                    <local:MyListItem Title="圈速与调校对比" Info="记录 Time Attack / Rivals 圈速，并按调校名称汇总最佳圈速、平均表现和圈数。" IsHitTestVisible="False" Height="50" />
+                    <local:MyListItem Title="问题标记" Info="自动提示抓地极限、悬挂压缩到底、重刹锁死等风险，也支持在复盘时手动标记问题点。" IsHitTestVisible="False" Height="50" />
+                    <local:MyListItem Title="本地遥测数据库" Info="会话、样本、圈速和问题标记默认写入本地 telemetry.db，便于离线复盘，不上传到项目服务器。" IsHitTestVisible="False" Height="50" />
+                </StackPanel>
+            </local:MyCard>
+
             <!-- 许可与版权 -->
             <local:MyCard x:Name="CardDisclaimer" Title="版权与免责声明" Margin="0,0,0,15">
                 <StackPanel Margin="20,40,20,18">
                     <TextBlock Text="免责声明：" FontWeight="SemiBold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
                     <TextBlock Text="1. 本软件为第三方开源调校工具，与微软公司 (Microsoft)、Xbox、Turn 10 或 Playground Games 官方无任何隶属或关联关系。Forza Horizon® 为微软公司注册商标。" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource ColorBrushGray3}" LineHeight="1.5" Margin="0,0,0,10" />
-                    <TextBlock Text="2. 本程序内嵌的物理调校算法部分推导自社区公开资料和玩家公开的公式常数，仅供竞速游戏爱好者交流和学习调优使用。" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource ColorBrushGray3}" LineHeight="1.5" Margin="0,0,0,14" />
+                    <TextBlock Text="2. 本程序内嵌的物理调校算法部分推导自社区公开资料和玩家公开的公式常数，仅供竞速游戏爱好者交流和学习调优使用。" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource ColorBrushGray3}" LineHeight="1.5" Margin="0,0,0,10" />
+                    <TextBlock Text="3. 遥测与圈速功能依赖游戏 Data Out 输出、网络监听设置和实际驾驶环境，记录结果仅用于个人复盘和调校比较，不代表官方计时或排行榜数据。" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource ColorBrushGray3}" LineHeight="1.5" Margin="0,0,0,14" />
                     
                     <Border Height="1" Background="{DynamicResource ColorBrushBorder}" Margin="0,0,0,12" />
 
@@ -27,6 +40,7 @@
                 <StackPanel Margin="20,40,20,18">
                     <local:MyListItem Title="社区研究员 Kireth" Info="提供了早期的地平线 6 物理机制反馈与物理调校常数校验。" IsHitTestVisible="False" Height="50" />
                     <local:MyListItem Title="ForzaTune Pro 公式推导" Info="弹簧自然频率（K = M × (2πf)²）及阻尼常数公式的重要参考来源。" IsHitTestVisible="False" Height="50" />
+                    <local:MyListItem Title="Forza Data Out" Info="实时遥测、圈速识别、路线回放和问题标记基于游戏输出的 UDP 遥测数据构建。" IsHitTestVisible="False" Height="50" />
                     <local:MyListItem Title="界面框架 QING.UIKIT" Info="基于 Meloong-Git/PCL 重构整理的 VB.NET / WPF 界面控件模板库。" IsHitTestVisible="False" Height="50" />
                 </StackPanel>
             </local:MyCard>

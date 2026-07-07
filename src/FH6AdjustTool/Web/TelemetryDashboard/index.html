@@ -58,16 +58,68 @@
     </section>
 
     <section class="workspace">
-      <article class="panel route-panel">
-        <div class="panel-title">
-          <h2>路线</h2>
-          <div class="replay-tools">
-            <button id="playReplayBtn">回放</button>
-            <input id="replaySlider" type="range" min="0" max="0" value="0">
+      <div class="main-stack">
+        <article class="panel route-panel">
+          <div class="panel-title">
+            <h2>路线</h2>
+            <div class="replay-tools">
+              <span class="legend-chip slow">低速</span>
+              <span class="legend-chip fast">高速</span>
+              <button id="playReplayBtn">回放</button>
+              <input id="replaySlider" type="range" min="0" max="0" value="0">
+            </div>
           </div>
-        </div>
-        <canvas id="routeCanvas" width="960" height="520"></canvas>
-      </article>
+          <canvas id="routeCanvas" width="960" height="520"></canvas>
+        </article>
+
+        <article class="panel data-panel">
+          <div class="panel-title">
+            <h2>数据复盘</h2>
+            <span id="sampleCountValue" class="panel-note">0 样本</span>
+          </div>
+          <div class="data-grid">
+            <section class="detail-grid">
+              <div><span>功率</span><strong id="powerValue">--</strong><small>kW</small></div>
+              <div><span>扭矩</span><strong id="torqueValue">--</strong><small>Nm</small></div>
+              <div><span>增压</span><strong id="boostValue">--</strong><small>psi</small></div>
+              <div><span>燃油</span><strong id="fuelValue">--</strong><small>%</small></div>
+              <div><span>横向 G</span><strong id="latGValue">--</strong><small>g</small></div>
+              <div><span>纵向 G</span><strong id="longGValue">--</strong><small>g</small></div>
+              <div><span>前胎温</span><strong id="frontTempValue">--</strong><small>deg C</small></div>
+              <div><span>后胎温</span><strong id="rearTempValue">--</strong><small>deg C</small></div>
+            </section>
+
+            <section class="bars">
+              <div class="bar-row">
+                <span>油门</span>
+                <div class="bar-track"><i id="throttleBar"></i></div>
+                <em id="throttleText">0%</em>
+              </div>
+              <div class="bar-row">
+                <span>刹车</span>
+                <div class="bar-track danger"><i id="brakeBar"></i></div>
+                <em id="brakeText">0%</em>
+              </div>
+              <div class="bar-row">
+                <span>转向</span>
+                <div class="bar-track signed"><i id="steerBar"></i></div>
+                <em id="steerText">0%</em>
+              </div>
+              <div class="bar-row">
+                <span>综合滑移</span>
+                <div class="bar-track warn"><i id="slipBar"></i></div>
+                <em id="slipText">0.00</em>
+              </div>
+              <div class="bar-row">
+                <span>悬挂压缩</span>
+                <div class="bar-track"><i id="suspensionBar"></i></div>
+                <em id="suspensionText">0%</em>
+              </div>
+            </section>
+          </div>
+          <canvas id="dataCanvas" width="960" height="180"></canvas>
+        </article>
+      </div>
 
       <aside class="stack">
         <article class="panel">

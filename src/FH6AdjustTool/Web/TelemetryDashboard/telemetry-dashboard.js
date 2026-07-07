@@ -93,6 +93,8 @@ function renderSnapshot() {
   $("carValue").textContent = context.carName || sample.carClassName || "未选择车辆";
   $("currentLapValue").textContent = sample.currentLapSeconds ? formatSeconds(sample.currentLapSeconds) : "--";
   $("gameLapValue").textContent = sample.lapNumber ? `Lap ${sample.lapNumber}` : "游戏计时";
+  renderDataPanel(sample);
+  renderDataChart();
 }
 
 function renderRoute() {
@@ -129,15 +131,19 @@ function renderRoute() {
     };
   };
 
-  ctx.lineWidth = 2 * scale;
-  ctx.strokeStyle = "#253041";
-  ctx.beginPath();
-  samples.forEach((sample, index) => {
-    const point = project(sample);
-    if (index === 0) ctx.moveTo(point.x, point.y);
-    else ctx.lineTo(point.x, point.y);
-  });
-  ctx.stroke();
+  const maxSpeed = Math.max(80, ...samples.map((s) => Number(s.speedKmh || 0)));
+  ctx.lineWidth = 2.4 * scale;
+  ctx.lineCap = "round";
+  for (let i = 1; i < samples.length; i++) {
+    const a = project(samples[i - 1]);
+    const b = project(samples[i]);
+    const speedRatio = clamp(Number(samples[i].speedKmh || 0) / maxSpeed, 0, 1);
+    ctx.strokeStyle = speedColor(speedRatio);
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.stroke();
+  }
 
   const live = state.replayIndex === null ? samples[samples.length - 1] : samples[Math.min(state.replayIndex, samples.length - 1)];
   const livePoint = project(live);
@@ -147,6 +153,96 @@ function renderRoute() {
   ctx.fill();
 
   updateReplaySlider(samples.length);
+}
+
+function renderDataPanel(sample) {
+  const samples = state.samples || [];
+  const frontTemp = avg(sample.tireTempFrontLeft, sample.tireTempFrontRight);
+  const rearTemp = avg(sample.tireTempRearLeft, sample.tireTempRearRight);
+  const suspensionMax = maxAbs(
+    sample.suspensionTravelFrontLeft,
+    sample.suspensionTravelFrontRight,
+    sample.suspensionTravelRearLeft,
+    sample.suspensionTravelRearRight
+  );
+  const peakSlip = Number(sample.peakCombinedSlip || maxAbs(
+    sample.tireCombinedSlipFrontLeft,
+    sample.tireCombinedSlipFrontRight,
+    sample.tireCombinedSlipRearLeft,
+    sample.tireCombinedSlipRearRight
+  ));
+
+  $("sampleCountValue").textContent = `${samples.length} 样本`;
+  $("powerValue").textContent = number(sample.powerKw, 0);
+  $("torqueValue").textContent = number(sample.torqueNm, 0);
+  $("boostValue").textContent = number(sample.boost, 1);
+  $("fuelValue").textContent = number(Number(sample.fuel || 0) * 100, 0);
+  $("latGValue").textContent = signed(sample.accelLatG, 2);
+  $("longGValue").textContent = signed(sample.accelLongG, 2);
+  $("frontTempValue").textContent = number(frontTemp, 0);
+  $("rearTempValue").textContent = number(rearTemp, 0);
+
+  setBar("throttle", Number(sample.throttle || 0) / 255);
+  setBar("brake", Number(sample.brake || 0) / 255);
+  setSignedBar("steer", normalizeSteer(sample.steer));
+  setBar("slip", clamp(peakSlip / 1.6, 0, 1), number(peakSlip, 2));
+  setBar("suspension", clamp(suspensionMax, 0, 1));
+}
+
+function renderDataChart() {
+  const canvas = $("dataCanvas");
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const scale = window.devicePixelRatio || 1;
+  const width = Math.max(320, Math.floor(rect.width * scale));
+  const height = Math.max(160, Math.floor(rect.height * scale));
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, width, height);
+  drawChartGrid(ctx, width, height, scale);
+
+  const samples = (state.samples || []).slice(-180);
+  if (samples.length < 2) {
+    drawEmptyChart(ctx, width, height);
+    return;
+  }
+
+  drawSeries(ctx, samples, width, height, scale, {
+    label: "速度",
+    color: "#146c74",
+    value: (s) => clamp(Number(s.speedKmh || 0) / 360, 0, 1)
+  });
+  drawSeries(ctx, samples, width, height, scale, {
+    label: "转速",
+    color: "#9d3f53",
+    value: (s) => clamp(Number(s.currentRpm || 0) / Math.max(1000, Number(s.engineMaxRpm || 8000)), 0, 1)
+  });
+  drawSeries(ctx, samples, width, height, scale, {
+    label: "油门",
+    color: "#2c8b57",
+    value: (s) => clamp(Number(s.throttle || 0) / 255, 0, 1)
+  });
+  drawSeries(ctx, samples, width, height, scale, {
+    label: "刹车",
+    color: "#a66a12",
+    value: (s) => clamp(Number(s.brake || 0) / 255, 0, 1)
+  });
+  drawSeries(ctx, samples, width, height, scale, {
+    label: "滑移",
+    color: "#253041",
+    value: (s) => clamp(Number(s.peakCombinedSlip || maxAbs(
+      s.tireCombinedSlipFrontLeft,
+      s.tireCombinedSlipFrontRight,
+      s.tireCombinedSlipRearLeft,
+      s.tireCombinedSlipRearRight
+    )) / 1.6, 0, 1)
+  });
+
+  drawChartLegend(ctx, scale);
 }
 
 function drawGrid(ctx, width, height) {
@@ -172,6 +268,80 @@ function drawEmptyRoute(ctx, width, height) {
   ctx.font = `${13 * (window.devicePixelRatio || 1)}px Segoe UI`;
   ctx.textAlign = "center";
   ctx.fillText("等待遥测轨迹", width / 2, height / 2);
+}
+
+function drawChartGrid(ctx, width, height, scale) {
+  ctx.fillStyle = "rgba(255,255,255,0.52)";
+  ctx.fillRect(0, 0, width, height);
+  ctx.strokeStyle = "rgba(38,48,65,0.08)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  const rows = 4;
+  for (let i = 1; i < rows; i++) {
+    const y = (height / rows) * i;
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+  }
+  for (let x = 0; x <= width; x += 80 * scale) {
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+  }
+  ctx.stroke();
+}
+
+function drawEmptyChart(ctx, width, height) {
+  ctx.fillStyle = "#687386";
+  ctx.font = `${12 * (window.devicePixelRatio || 1)}px Segoe UI`;
+  ctx.textAlign = "center";
+  ctx.fillText("等待速度、转速、输入和滑移曲线", width / 2, height / 2);
+}
+
+function drawSeries(ctx, samples, width, height, scale, series) {
+  const padX = 18 * scale;
+  const padY = 18 * scale;
+  const usableW = Math.max(1, width - padX * 2);
+  const usableH = Math.max(1, height - padY * 2);
+  ctx.strokeStyle = series.color;
+  ctx.lineWidth = 1.8 * scale;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  samples.forEach((sample, index) => {
+    const x = padX + (index / Math.max(1, samples.length - 1)) * usableW;
+    const y = height - padY - clamp(series.value(sample), 0, 1) * usableH;
+    if (index === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
+
+function drawChartLegend(ctx, scale) {
+  const items = [
+    ["速度", "#146c74"],
+    ["转速", "#9d3f53"],
+    ["油门", "#2c8b57"],
+    ["刹车", "#a66a12"],
+    ["滑移", "#253041"]
+  ];
+  let x = 14 * scale;
+  const y = 16 * scale;
+  ctx.font = `${11 * scale}px Segoe UI`;
+  ctx.textAlign = "left";
+  for (const [label, color] of items) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y - 7 * scale, 16 * scale, 3 * scale);
+    ctx.fillStyle = "#687386";
+    ctx.fillText(label, x + 22 * scale, y - 3 * scale);
+    x += 68 * scale;
+  }
+}
+
+function speedColor(ratio) {
+  const t = clamp(ratio, 0, 1);
+  const slow = [20, 108, 116];
+  const fast = [157, 63, 83];
+  const rgb = slow.map((value, index) => Math.round(value + (fast[index] - value) * t));
+  return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
 }
 
 function getBounds(samples) {
@@ -294,6 +464,54 @@ function formatMs(ms) {
   return `${minutes}:${String(seconds).padStart(2, "0")}.${String(millis).padStart(3, "0")}`;
 }
 
+function signed(value, digits = 1) {
+  const n = Number(value || 0);
+  if (!Number.isFinite(n)) return "0";
+  return `${n > 0 ? "+" : ""}${n.toFixed(digits)}`;
+}
+
+function avg(...values) {
+  const nums = values.map((v) => Number(v)).filter((v) => Number.isFinite(v));
+  if (!nums.length) return 0;
+  return nums.reduce((sum, value) => sum + value, 0) / nums.length;
+}
+
+function maxAbs(...values) {
+  const nums = values.map((v) => Math.abs(Number(v || 0))).filter((v) => Number.isFinite(v));
+  return nums.length ? Math.max(...nums) : 0;
+}
+
+function clamp(value, min, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return min;
+  return Math.min(max, Math.max(min, n));
+}
+
+function normalizeSteer(value) {
+  const n = Number(value || 0);
+  if (Math.abs(n) <= 1) return clamp(n, -1, 1);
+  return clamp(n / 127, -1, 1);
+}
+
+function setBar(name, ratio, text = null) {
+  const bar = $(`${name}Bar`);
+  const label = $(`${name}Text`);
+  const value = clamp(ratio, 0, 1);
+  if (bar) bar.style.width = `${Math.round(value * 100)}%`;
+  if (label) label.textContent = text || `${Math.round(value * 100)}%`;
+}
+
+function setSignedBar(name, ratio) {
+  const bar = $(`${name}Bar`);
+  const label = $(`${name}Text`);
+  const value = clamp(ratio, -1, 1);
+  if (bar) {
+    bar.style.width = `${Math.abs(value) * 50}%`;
+    bar.style.marginLeft = value < 0 ? `${50 - Math.abs(value) * 50}%` : "50%";
+  }
+  if (label) label.textContent = `${Math.round(value * 100)}%`;
+}
+
 async function refreshAll() {
   try {
     const payload = await bridge("getSnapshot");
@@ -361,7 +579,10 @@ function wireUi() {
     state.replayIndex = Number(event.target.value || 0);
     renderRoute();
   });
-  window.addEventListener("resize", () => renderRoute());
+  window.addEventListener("resize", () => {
+    renderRoute();
+    renderDataChart();
+  });
   if (window.chrome && window.chrome.webview) {
     window.chrome.webview.addEventListener("message", (event) => handleHostEvent(event.data));
   }

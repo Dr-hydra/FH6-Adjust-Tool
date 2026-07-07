@@ -49,6 +49,44 @@
                 </StackPanel>
             </local:MyCard>
 
+            <!-- 存档导入 -->
+            <local:MyCard x:Name="CardSaveImport" Title="存档导入" Margin="0,0,0,15">
+                <StackPanel Margin="20,40,20,18">
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="手动存档目录" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush2}" />
+                        <local:MyTextBox x:Name="TxtGameSavePath" Grid.Column="1" Height="34"
+                                         HintText="留空则自动识别，例如 C:\XboxGames\GameSave\pgs"
+                                         local:SettingService.Key="GameSavePath" />
+                    </Grid>
+                    <TextBlock x:Name="LabGameSaveResolved"
+                               Text="当前识别目录：正在读取..."
+                               TextWrapping="Wrap"
+                               FontSize="11"
+                               Foreground="{DynamicResource ColorBrushGray3}"
+                               Margin="0,0,0,12" />
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyButton x:Name="BtnSelectGameSavePath" Text="选择目录" Padding="12,8" />
+                        <local:MyButton x:Name="BtnClearGameSavePath" Grid.Column="2" Text="恢复自动识别" Padding="12,8" />
+                        <local:MyButton x:Name="BtnOpenGameSavePath" Grid.Column="4" Text="打开当前目录" Padding="12,8" />
+                    </Grid>
+                    <TextBlock Text="可选择 pgs 根目录、某个档案目录或 ContainersRoot；导入器只读扫描 Tuning_* 调校容器，不会修改游戏存档。"
+                               TextWrapping="Wrap"
+                               FontSize="11"
+                               Foreground="{DynamicResource ColorBrushGray3}" />
+                </StackPanel>
+            </local:MyCard>
+
             <!-- 遥测数据 -->
             <local:MyCard x:Name="CardTelemetry" Title="遥测数据" Margin="0,0,0,15">
                 <StackPanel Margin="20,40,20,18">

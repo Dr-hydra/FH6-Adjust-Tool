@@ -6,18 +6,16 @@ Imports QING.Core
 Public Class PageUiKitLeft
 
     Private CurrentPage As UiKitDemoPage = UiKitDemoPage.Tuner
-    Private CurrentRight As MyPageRight
-    Private _currentScroll As MyScrollViewer = Nothing
+    Private CurrentSubPage As UiKitSubPage = UiKitSubPage.TunerMain
 
-    Public Sub Configure(page As UiKitDemoPage, rightPage As MyPageRight)
+    Public Sub Configure(page As UiKitDemoPage, subPage As UiKitSubPage)
         CurrentPage = page
-        CurrentRight = rightPage
+        CurrentSubPage = subPage
         
         If page = UiKitDemoPage.Tuner Then
             GridTunerAI.Visibility = Visibility.Visible
             GridOtherNav.Visibility = Visibility.Collapsed
             Width = 320
-            SetCurrentScroll(Nothing)
         Else
             GridTunerAI.Visibility = Visibility.Collapsed
             GridOtherNav.Visibility = Visibility.Visible
@@ -37,12 +35,7 @@ Public Class PageUiKitLeft
                     LabNavTitle.Text = "栏目导航"
             End Select
             
-            ' Populate dynamic secondary nav items
-            PopulateSecondaryNav(page, rightPage)
-            
-            ' Bind scroll event
-            Dim scroll = UiKitShellNavigation.GetActiveScroll(rightPage)
-            SetCurrentScroll(scroll)
+            PopulateSecondaryNav(page, subPage)
         End If
     End Sub
 
@@ -50,20 +43,10 @@ Public Class PageUiKitLeft
         ' Status items removed from sidebar layout, stubbed to prevent NullReferenceException.
     End Sub
 
-    Private Sub PopulateSecondaryNav(page As UiKitDemoPage, rightPage As MyPageRight)
+    Private Sub PopulateSecondaryNav(page As UiKitDemoPage, subPage As UiKitSubPage)
         PanSecondaryNav.Children.Clear()
         
-        Dim navItems As List(Of Tuple(Of String, FrameworkElement)) = Nothing
-        
-        If TypeOf rightPage Is PageSavedTunes Then
-            navItems = CType(rightPage, PageSavedTunes).GetSecondaryNavItems()
-        ElseIf TypeOf rightPage Is PageTelemetry Then
-            navItems = CType(rightPage, PageTelemetry).GetSecondaryNavItems()
-        ElseIf TypeOf rightPage Is PageSettings Then
-            navItems = CType(rightPage, PageSettings).GetSecondaryNavItems()
-        ElseIf TypeOf rightPage Is PageAbout Then
-            navItems = CType(rightPage, PageAbout).GetSecondaryNavItems()
-        End If
+        Dim navItems = GetSubNavItems(page)
         
         If navItems IsNot Nothing Then
             For Each navItem In navItems
@@ -78,89 +61,60 @@ Public Class PageUiKitLeft
                 AddHandler item.Check, AddressOf SecondaryNavItem_Check
                 PanSecondaryNav.Children.Add(item)
             Next
-            
-            ' Select the first one initially
-            If PanSecondaryNav.Children.Count > 0 Then
-                CType(PanSecondaryNav.Children(0), MyListItem).SetChecked(True, False, False)
-            End If
+            SetChecked(subPage)
         End If
     End Sub
 
-    Private Sub SetCurrentScroll(scroll As MyScrollViewer)
-        If _currentScroll IsNot Nothing Then
-            RemoveHandler _currentScroll.ScrollChanged, AddressOf ScrollViewer_ScrollChanged
-        End If
-        _currentScroll = scroll
-        If _currentScroll IsNot Nothing Then
-            AddHandler _currentScroll.ScrollChanged, AddressOf ScrollViewer_ScrollChanged
-        End If
-    End Sub
+    Private Function GetSubNavItems(page As UiKitDemoPage) As List(Of Tuple(Of String, UiKitSubPage))
+        Select Case page
+            Case UiKitDemoPage.SavedTunes
+                Return New List(Of Tuple(Of String, UiKitSubPage)) From {
+                    New Tuple(Of String, UiKitSubPage)("存档导入", UiKitSubPage.SavedTunesSaveImport),
+                    New Tuple(Of String, UiKitSubPage)("导入分享码", UiKitSubPage.SavedTunesShareImport),
+                    New Tuple(Of String, UiKitSubPage)("方案列表", UiKitSubPage.SavedTunesList)
+                }
+            Case UiKitDemoPage.Telemetry
+                Return New List(Of Tuple(Of String, UiKitSubPage)) From {
+                    New Tuple(Of String, UiKitSubPage)("遥测仪表盘", UiKitSubPage.TelemetryDashboard)
+                }
+            Case UiKitDemoPage.Settings
+                Return New List(Of Tuple(Of String, UiKitSubPage)) From {
+                    New Tuple(Of String, UiKitSubPage)("计量单位", UiKitSubPage.SettingsUnits),
+                    New Tuple(Of String, UiKitSubPage)("存档导入", UiKitSubPage.SettingsSaveImport),
+                    New Tuple(Of String, UiKitSubPage)("遥测数据", UiKitSubPage.SettingsTelemetry),
+                    New Tuple(Of String, UiKitSubPage)("智能接口", UiKitSubPage.SettingsAi),
+                    New Tuple(Of String, UiKitSubPage)("主题配色", UiKitSubPage.SettingsThemeColors),
+                    New Tuple(Of String, UiKitSubPage)("背景磨砂", UiKitSubPage.SettingsBackground)
+                }
+            Case UiKitDemoPage.About
+                Return New List(Of Tuple(Of String, UiKitSubPage)) From {
+                    New Tuple(Of String, UiKitSubPage)("功能说明", UiKitSubPage.AboutFeatures),
+                    New Tuple(Of String, UiKitSubPage)("版权免责", UiKitSubPage.AboutDisclaimer),
+                    New Tuple(Of String, UiKitSubPage)("致谢数据", UiKitSubPage.AboutCredits)
+                }
+            Case Else
+                Return New List(Of Tuple(Of String, UiKitSubPage))()
+        End Select
+    End Function
 
-    Private Sub ScrollViewer_ScrollChanged(sender As Object, e As ScrollChangedEventArgs)
-        UpdateSelectedNavBasedOnScroll()
-    End Sub
-
-    Private Sub UpdateSelectedNavBasedOnScroll()
-        If PanSecondaryNav.Children.Count = 0 OrElse CurrentRight Is Nothing Then Return
-        Dim scroll = UiKitShellNavigation.GetActiveScroll(CurrentRight)
-        If scroll Is Nothing Then Return
-        
-        Dim activeItem As MyListItem = Nothing
-        Dim maxVal As Double = Double.MinValue
-        
+    Private Sub SetChecked(subPage As UiKitSubPage)
         For Each child In PanSecondaryNav.Children
             Dim item = TryCast(child, MyListItem)
             If item IsNot Nothing Then
-                Dim target = TryCast(item.Tag, FrameworkElement)
-                If target IsNot Nothing AndAlso target.IsVisible Then
-                    Try
-                        Dim relativeY = target.TransformToVisual(scroll).Transform(New Point(0, 0)).Y
-                        ' Threshold of 100 pixels from top
-                        If relativeY <= 100 AndAlso relativeY > maxVal Then
-                            maxVal = relativeY
-                            activeItem = item
-                        End If
-                    Catch
-                        ' Visual not connected, ignore
-                    End Try
-                End If
+                item.SetChecked(CInt(CType(item.Tag, UiKitSubPage)) = CInt(subPage), False, False)
             End If
         Next
-        
-        ' If none found (e.g. all below threshold), pick the first one
-        If activeItem Is Nothing AndAlso PanSecondaryNav.Children.Count > 0 Then
-            activeItem = TryCast(PanSecondaryNav.Children(0), MyListItem)
-        End If
-        
-        If activeItem IsNot Nothing AndAlso Not activeItem.Checked Then
-            For Each child In PanSecondaryNav.Children
-                Dim item = TryCast(child, MyListItem)
-                If item IsNot Nothing Then
-                    item.SetChecked(item.Equals(activeItem), False, True)
-                End If
-            Next
-        End If
     End Sub
 
     Private Sub SecondaryNavItem_Check(sender As Object, e As RouteEventArgs)
         If Not e.RaiseByMouse Then Return
         
         Dim item = TryCast(sender, MyListItem)
-        If item Is Nothing OrElse item.Tag Is Nothing Then Return
-        
-        Dim target = TryCast(item.Tag, FrameworkElement)
-        If target Is Nothing Then Return
-        
-        Dim scroll = UiKitShellNavigation.GetActiveScroll(CurrentRight)
-        If scroll IsNot Nothing Then
-            Try
-                Dim relativePoint = target.TransformToVisual(scroll).Transform(New Point(0, 0))
-                Dim offsetDelta = relativePoint.Y - 15
-                scroll.PerformVerticalOffsetDelta(offsetDelta)
-            Catch ex As Exception
-                Logger.Error("滚动到指定卡片失败: " & ex.Message)
-            End Try
-        End If
+        If item Is Nothing OrElse item.Tag Is Nothing OrElse FrmMain Is Nothing Then Return
+
+        Dim subPage = CType(item.Tag, UiKitSubPage)
+        If subPage = CurrentSubPage Then Return
+        FrmMain.SubPageChange(subPage)
     End Sub
 
     Public ChatHistory As New List(Of ChatMessage)

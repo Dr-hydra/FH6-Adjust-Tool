@@ -11,6 +11,7 @@ Public Class PageSavedTunes
     Private HandlersAttached As Boolean = False
     Private ScannedSaveTuneCandidates As New List(Of SaveTuneImportCandidate)()
     Private BatchDeleteMode As Boolean = False
+    Private IsImportingSaveTunes As Boolean = False
 
     Public Sub PageSavedTunes_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
         RefreshTunesList()
@@ -74,11 +75,10 @@ Public Class PageSavedTunes
     End Sub
 
     Private Sub OnImportSelectedSaveTunesClicked(sender As Object, e As RoutedEventArgs)
-        Dim selected = PanelSaveTuneCandidates.Children.
-            OfType(Of FrameworkElement)().
-            Select(Function(row) TryCast(row.Tag, Tuple(Of MyCheckBox, SaveTuneImportCandidate))).
-            Where(Function(item) item IsNot Nothing AndAlso item.Item1.Checked).
-            Select(Function(item) item.Item2).
+        If IsImportingSaveTunes Then Return
+
+        Dim selected = ScannedSaveTuneCandidates.
+            Where(Function(candidate) candidate.IsSelected).
             ToList()
 
         If selected.Count = 0 Then
@@ -86,19 +86,41 @@ Public Class PageSavedTunes
             Return
         End If
 
-        Dim imported As Integer = 0
+        IsImportingSaveTunes = True
+        BtnImportSelectedSaveTunes.IsEnabled = False
         For Each candidate In selected
-            Dim tune = candidate.ImportedTune
-            tune.Id = Guid.NewGuid().ToString()
-            tune.Name = EnsureUniqueTuneName(tune.Name)
-            tune.SavedAt = DateTime.Now
-            SavedTunesDatabase.SaveTune(tune)
-            imported += 1
+            candidate.IsSelected = False
         Next
 
-        Hint($"已导入 {imported} 个存档调校。", HintType.Green)
-        LabSaveImportStatus.Text = $"已导入 {imported} 个存档调校。"
-        RefreshTunesList()
+        Try
+            Dim imported As Integer = 0
+            Dim updated As Integer = 0
+            For Each candidate In selected
+                Dim tune = candidate.ImportedTune
+                tune.Id = Guid.NewGuid().ToString()
+                tune.Name = EnsureUniqueTuneName(tune.Name)
+                tune.SavedAt = DateTime.Now
+                If SavedTunesDatabase.SaveImportedTune(tune) = ImportedTuneSaveResult.Added Then
+                    imported += 1
+                Else
+                    updated += 1
+                End If
+            Next
+
+            Dim message = $"已导入 {imported} 个存档调校"
+            If updated > 0 Then message &= $"，刷新 {updated} 个已有方案"
+            message &= "。"
+            RenderSaveTuneCandidates()
+            Hint(message, If(imported > 0 OrElse updated > 0, HintType.Green, HintType.Blue))
+            LabSaveImportStatus.Text = message
+            RefreshTunesList()
+        Catch ex As Exception
+            LabSaveImportStatus.Text = "导入失败：" & ex.Message
+            Hint("导入存档调校失败：" & ex.Message, HintType.Red)
+        Finally
+            IsImportingSaveTunes = False
+            BtnImportSelectedSaveTunes.IsEnabled = True
+        End Try
     End Sub
 
     Private Sub RenderSaveTuneCandidates()
@@ -127,9 +149,12 @@ Public Class PageSavedTunes
             Dim panel As New StackPanel()
             Dim check As New MyCheckBox() With {
                 .Text = $"{candidate.TuneName}  ·  {candidate.VehicleName}",
-                .Checked = False,
+                .Checked = candidate.IsSelected,
                 .Margin = New Thickness(0, 0, 0, 6)
             }
+            AddHandler check.Change, Sub(checkSender As Object, user As Boolean)
+                                         candidate.IsSelected = check.Checked
+                                     End Sub
             panel.Children.Add(check)
 
             Dim info = New TextBlock() With {
@@ -142,13 +167,46 @@ Public Class PageSavedTunes
             panel.Children.Add(info)
 
             Dim detail = New TextBlock() With {
-                .Text = $"来源：{candidate.FolderName}    滑块：{candidate.SliderCount}    部件槽：{candidate.PartCount}",
+                .Text = $"来源：{candidate.FolderName}    滑块：{candidate.SliderCount}    已解析升级槽：{candidate.ResolvedPartCount}/{candidate.UpgradeSlotCount}    动态范围：{candidate.DynamicRangeCount}    估算重量：{candidate.EstimatedWeightKg:0.0} kg",
                 .TextWrapping = TextWrapping.Wrap,
                 .FontSize = 11,
                 .Margin = New Thickness(24, 0, 0, 0)
             }
             detail.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray3")
             panel.Children.Add(detail)
+
+            Dim imported = candidate.ImportedTune
+            Dim ratingText = $"{imported.State.CarClass} {imported.State.Pi}".Trim()
+            If imported.PerformanceRatingIsStockFallback Then ratingText &= "（原厂参考）"
+            Dim specifications = New TextBlock() With {
+                .Text = $"改装规格：{imported.State.Weight:0.0} kg · 前配重 {imported.State.WeightDist:0.0}% · {imported.State.DriveType} · {ratingText} · {imported.State.TireWF} / {imported.State.TireWR}",
+                .TextWrapping = TextWrapping.Wrap,
+                .FontSize = 11,
+                .Margin = New Thickness(24, 2, 0, 0)
+            }
+            specifications.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray2")
+            panel.Children.Add(specifications)
+
+            Dim recommendation = New TextBlock() With {
+                .Text = $"推荐：{imported.State.TuneId} / {imported.State.Surface} / {imported.State.Compound}    {imported.ModeRecommendationReason}",
+                .TextWrapping = TextWrapping.Wrap,
+                .FontSize = 11,
+                .Margin = New Thickness(24, 2, 0, 0)
+            }
+            recommendation.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray2")
+            panel.Children.Add(recommendation)
+
+            Dim parts = If(imported.InstalledParts, New List(Of InstalledPartSummary)())
+            Dim compactParts = String.Join("、", parts.Take(5).Select(Function(part) FormatInstalledPart(part, False)))
+            If parts.Count > 5 Then compactParts &= $" 等 {parts.Count} 项"
+            Dim partSummary = New TextBlock() With {
+                .Text = If(parts.Count = 0, "改装摘要：未识别到非原厂配件", "改装摘要：" & compactParts),
+                .TextWrapping = TextWrapping.Wrap,
+                .FontSize = 11,
+                .Margin = New Thickness(24, 2, 0, 0)
+            }
+            partSummary.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray3")
+            panel.Children.Add(partSummary)
 
             row.Child = panel
             row.Tag = New Tuple(Of MyCheckBox, SaveTuneImportCandidate)(check, candidate)
@@ -358,6 +416,12 @@ Public Class PageSavedTunes
         If summary IsNot Nothing Then
             bodyPanel.Children.Add(CreateSummaryPanel(summary))
         End If
+        bodyPanel.Children.Add(CreateTuningStatePanel(tune))
+
+        Dim installedPartsPanel = CreateInstalledPartsPanel(tune)
+        If installedPartsPanel IsNot Nothing Then
+            bodyPanel.Children.Add(installedPartsPanel)
+        End If
 
         Dim divider As New Border() With {
             .Height = 1,
@@ -429,6 +493,111 @@ Public Class PageSavedTunes
         bodyPanel.UpdateLayout()
     End Sub
 
+    Private Function CreateTuningStatePanel(tune As SavedTune) As UIElement
+        Dim state = If(tune.State, New TuningState())
+        Dim panel As New StackPanel() With {.Margin = New Thickness(0, 8, 0, 4)}
+        Dim title As New TextBlock() With {
+            .Text = "车辆规格与参数配置",
+            .FontWeight = FontWeights.SemiBold,
+            .FontSize = 13,
+            .Margin = New Thickness(0, 0, 0, 8)
+        }
+        title.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush3")
+        panel.Children.Add(title)
+
+        Dim grid As New UniformGrid() With {.Columns = 3}
+        Dim weightText = $"改装估算 {state.Weight:0.##} {state.WeightUnit} / 前配重估算 {state.WeightDist:0.##}%"
+        If tune.StockWeightKg > 0 Then weightText &= $" / 原厂 {tune.StockWeightKg:0.##} kg"
+        Dim ratingText = $"{state.CarClass} {state.Pi}".Trim()
+        If tune.PerformanceRatingIsStockFallback Then ratingText &= "（原厂参考）"
+        Dim rpmText = $"红线 {state.RedlineRpm:0} rpm"
+        If state.PeakTorqueRpm > 0 Then rpmText &= $" / 峰值 {state.PeakTorqueRpm:0} rpm" Else rpmText &= " / 峰值未知"
+        Dim performanceText = If(state.MaxTorque > 0 OrElse state.Topspeed > 0,
+            $"{state.MaxTorque:0.##} Nm / {state.Topspeed:0.##} {state.SpeedUnit}",
+            "无法从调教存档恢复")
+        grid.Children.Add(CreateReadOnlySpec("车型", $"{state.Make} {state.Model}".Trim()))
+        grid.Children.Add(CreateReadOnlySpec("模式与路面", $"{state.TuneId} / {state.Surface}"))
+        grid.Children.Add(CreateReadOnlySpec("驱动方式", state.DriveType))
+        grid.Children.Add(CreateReadOnlySpec("重量与前配重", weightText))
+        grid.Children.Add(CreateReadOnlySpec("等级与 PI", ratingText))
+        grid.Children.Add(CreateReadOnlySpec("轮胎规格", $"{state.TireWF} / {state.TireWR}"))
+        grid.Children.Add(CreateReadOnlySpec("轮胎类型", state.Compound))
+        grid.Children.Add(CreateReadOnlySpec("转速", rpmText))
+        grid.Children.Add(CreateReadOnlySpec("扭矩与极速", performanceText))
+        grid.Children.Add(CreateReadOnlySpec("变速箱", If(state.IncludeGearing, $"启用 / {state.Gears} 挡", "未启用")))
+        grid.Children.Add(CreateReadOnlySpec("空气动力", If(state.HasAero, $"前 {state.AeroF:0.##} / 后 {state.AeroR:0.##}", "未启用")))
+        grid.Children.Add(CreateReadOnlySpec("操控倾向", $"平衡 {state.FeelBalance:0.#} / 激进 {state.FeelAggression:0.#}"))
+        grid.Children.Add(CreateReadOnlySpec("单位配置", $"{state.PressureUnit} / {state.SpringsUnit}"))
+        If Not String.IsNullOrWhiteSpace(tune.SpecificationNote) Then
+            grid.Children.Add(CreateReadOnlySpec("规格来源", tune.SpecificationNote))
+        End If
+        panel.Children.Add(grid)
+        Return panel
+    End Function
+
+    Private Function CreateInstalledPartsPanel(tune As SavedTune) As UIElement
+        Dim parts = If(tune.InstalledParts, New List(Of InstalledPartSummary)())
+        If parts.Count = 0 AndAlso String.IsNullOrWhiteSpace(tune.ModeRecommendationReason) Then Return Nothing
+
+        Dim panel As New StackPanel() With {.Margin = New Thickness(0, 12, 0, 2)}
+        Dim divider As New Border() With {.Height = 1, .Margin = New Thickness(0, 0, 0, 10)}
+        divider.SetResourceReference(Border.BackgroundProperty, "ColorBrushBorder")
+        panel.Children.Add(divider)
+
+        Dim title As New TextBlock() With {
+            .Text = "模式推荐与已安装配件",
+            .FontWeight = FontWeights.SemiBold,
+            .FontSize = 13,
+            .Margin = New Thickness(0, 0, 0, 6)
+        }
+        title.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush3")
+        panel.Children.Add(title)
+
+        If Not String.IsNullOrWhiteSpace(tune.ModeRecommendationReason) Then
+            Dim recommendation As New TextBlock() With {
+                .Text = $"推荐 {tune.State.TuneId} / {tune.State.Surface} / {tune.State.Compound}：{tune.ModeRecommendationReason}",
+                .TextWrapping = TextWrapping.Wrap,
+                .FontSize = 11,
+                .Margin = New Thickness(0, 0, 0, 8)
+            }
+            recommendation.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray2")
+            panel.Children.Add(recommendation)
+        End If
+
+        For Each group In parts.GroupBy(Function(part) part.Category)
+            Dim groupTitle As New TextBlock() With {
+                .Text = $"{group.Key}（{group.Count()}）",
+                .FontWeight = FontWeights.SemiBold,
+                .FontSize = 11,
+                .Margin = New Thickness(0, If(panel.Children.Count > 2, 5, 0), 0, 2)
+            }
+            groupTitle.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush2")
+            panel.Children.Add(groupTitle)
+
+            For Each part In group
+                Dim line As New TextBlock() With {
+                    .Text = FormatInstalledPart(part, True),
+                    .TextWrapping = TextWrapping.Wrap,
+                    .FontSize = 11,
+                    .Margin = New Thickness(10, 1, 0, 1)
+                }
+                line.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray3")
+                panel.Children.Add(line)
+            Next
+        Next
+
+        Return panel
+    End Function
+
+    Private Function FormatInstalledPart(part As InstalledPartSummary, includeDetails As Boolean) As String
+        Dim level = If(part.Level.HasValue, $" L{part.Level.Value}", "")
+        Dim id = If(part.PartId > 0, $" #{part.PartId}", "")
+        If includeDetails AndAlso Not String.IsNullOrWhiteSpace(part.Details) Then
+            Return $"{part.DisplayName}{level}{id} · {part.Details}"
+        End If
+        Return $"{part.DisplayName}{level}"
+    End Function
+
     Private Sub EnsureTuneResult(tune As SavedTune)
         If tune.Result IsNot Nothing AndAlso tune.Result.Tires IsNot Nothing AndAlso tune.Result.Tires.Values.Count > 0 Then Return
         Try
@@ -450,6 +619,7 @@ Public Class PageSavedTunes
         target.Children.Add(titleBlock)
 
         For Each item In category.Values
+            If item.Key = "Drag Cd" Then Continue For
             Dim tb As New MyTextBox() With {.Text = item.Value}
             txtMap($"{catName}/{item.Key}") = tb
             target.Children.Add(CreateEditableField(item.Key, tb))
@@ -508,6 +678,7 @@ Public Class PageSavedTunes
                                         newTune.Id = Guid.NewGuid().ToString()
                                         newTune.Name = newName
                                         newTune.SavedAt = DateTime.Now
+                                        newTune.SourceFingerprint = ""
                                         SavedTunesDatabase.SaveTune(newTune)
                                         Hint("另存新调校 “" & newName & "” 成功！", HintType.Green)
                                         RefreshTunesList()
@@ -577,7 +748,8 @@ Public Class PageSavedTunes
         Dim val As New TextBlock() With {
             .Text = value,
             .FontSize = 12.5,
-            .FontWeight = FontWeights.SemiBold
+            .FontWeight = FontWeights.SemiBold,
+            .TextWrapping = TextWrapping.Wrap
         }
         val.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush1")
         panel.Children.Add(lbl)

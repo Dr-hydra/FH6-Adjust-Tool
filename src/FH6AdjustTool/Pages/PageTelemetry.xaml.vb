@@ -52,7 +52,7 @@ Public Class PageTelemetry
         WebTelemetry.CoreWebView2.Settings.AreDevToolsEnabled = Settings.Get(Of Boolean)("SystemDebugMode", False)
         AddHandler WebTelemetry.CoreWebView2.WebMessageReceived, AddressOf CoreWebView2_WebMessageReceived
 
-        Dim dashboardDir = IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Web", "TelemetryDashboard")
+        Dim dashboardDir = IO.Path.Combine(PathExeFolder, "Web", "TelemetryDashboard")
         Dim indexPath = IO.Path.Combine(dashboardDir, "index.html")
         If IO.File.Exists(indexPath) Then
             WebTelemetry.CoreWebView2.SetVirtualHostNameToFolderMapping("telemetry.fh6.local", dashboardDir, CoreWebView2HostResourceAccessKind.Allow)

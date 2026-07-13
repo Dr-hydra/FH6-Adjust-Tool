@@ -74,14 +74,14 @@ Public Class PageTuner
     ' Refresh the ComboBox list based on search or full list
     Private Sub RefreshCarCombo(Optional keyword As String = "")
         ComboCar.Items.Clear()
-        Dim searchResults = If(String.IsNullOrWhiteSpace(keyword), 
-            CarDatabase.CarsList, 
-            CarDatabase.CarsList.Where(Function(c) c.make.Contains(keyword, StringComparison.OrdinalIgnoreCase) OrElse 
-                                                 c.model.Contains(keyword, StringComparison.OrdinalIgnoreCase)).ToList()
+        Dim searchResults = If(String.IsNullOrWhiteSpace(keyword),
+            CarDatabase.CarsList,
+            CarDatabase.CarsList.Where(Function(c) $"{c.year} {c.make} {c.model} {c.drive}".
+                IndexOf(keyword.Trim(), StringComparison.OrdinalIgnoreCase) >= 0).ToList()
         )
         
         For Each car In searchResults
-            ComboCar.Items.Add($"{car.make} {car.model} ({car.year}) [{car.drive}]")
+            ComboCar.Items.Add(FormatCarText(car))
         Next
         
         If ComboCar.Items.Count > 0 Then
@@ -99,8 +99,7 @@ Public Class PageTuner
         If IsInitializing OrElse ComboCar.SelectedIndex = -1 Then Return
         
         Try
-            Dim selectedText = ComboCar.SelectedItem.ToString()
-            Dim selectedCar = CarDatabase.CarsList.FirstOrDefault(Function(c) $"{c.make} {c.model} ({c.year}) [{c.drive}]" = selectedText)
+            Dim selectedCar = GetSelectedCar()
             
             If selectedCar IsNot Nothing Then
                 IsInitializing = True
@@ -117,12 +116,12 @@ Public Class PageTuner
                 Dim classIndex = ComboClass.Items.Cast(Of String)().ToList().IndexOf(selectedCar.cls)
                 If classIndex <> -1 Then ComboClass.SelectedIndex = classIndex
                 
-                ' Default weight distribution: AWD/FWD = 52, RWD = 48
-                TxtWeightDist.Text = If(selectedCar.drive = "RWD", "48", "52")
+                ' Use the FH6 database value instead of a drivetrain-based estimate.
+                TxtWeightDist.Text = selectedCar.weightDist.ToString()
                 
                 ' Fill gearing if available
-                If selectedCar.gears IsNot Nothing AndAlso selectedCar.gears.Count > 0 Then
-                    TxtGears.Text = selectedCar.gears.Count.ToString()
+                If selectedCar.numGears > 0 Then
+                    TxtGears.Text = selectedCar.numGears.ToString()
                 End If
                 
                 IsInitializing = False
@@ -131,6 +130,16 @@ Public Class PageTuner
             ' Silent fail
         End Try
     End Sub
+
+    Private Function FormatCarText(car As Car) As String
+        Return $"{car.make} {car.model} ({car.year}) [{car.drive}]"
+    End Function
+
+    Private Function GetSelectedCar() As Car
+        If ComboCar.SelectedItem Is Nothing Then Return Nothing
+        Dim selectedText = ComboCar.SelectedItem.ToString()
+        Return CarDatabase.CarsList.FirstOrDefault(Function(car) FormatCarText(car) = selectedText)
+    End Function
 
     ' Mode Selection Click Handles
     Private Sub BtnModeRace_Click(sender As Object, e As EventArgs) Handles BtnModeRace.Click
@@ -211,10 +220,16 @@ Public Class PageTuner
     End Sub
 
     Private Sub PopulateTuningState(s As TuningState)
+        Dim selectedCar = GetSelectedCar()
+        If selectedCar IsNot Nothing Then
+            s.Make = selectedCar.make
+            s.Model = selectedCar.model
+        End If
         s.TuneId = ActiveMode
         s.DriveType = If(ComboDriveType.SelectedItem?.ToString(), "AWD")
         s.CarClass = If(ComboClass.SelectedItem?.ToString(), "A")
         s.Compound = If(ComboCompound.SelectedItem?.ToString(), "Street")
+        s.Surface = InferSurfaceFromCompound(s.Compound)
         s.DragDist = If(ComboDragDist.SelectedItem?.ToString(), "quarter")
         
         ' Unit systems (Load from settings, fallback to metric/imperial defaults)
@@ -245,9 +260,15 @@ Public Class PageTuner
         If s.HasAero Then
             Double.TryParse(TxtAeroF.Text, s.AeroF)
             Double.TryParse(TxtAeroR.Text, s.AeroR)
-            Double.TryParse(TxtDragCd.Text, s.DragCd)
+            s.DragCd = 0
         End If
     End Sub
+
+    Private Function InferSurfaceFromCompound(compound As String) As String
+        If String.Equals(compound, "Snow", StringComparison.OrdinalIgnoreCase) Then Return "Snow"
+        If String.Equals(compound, "Rally", StringComparison.OrdinalIgnoreCase) Then Return "Mixed"
+        Return "Road"
+    End Function
 
     Private Sub BtnSaveTune_Click(sender As Object, e As EventArgs) Handles BtnSaveTune.Click
         Dim name As String = TxtTuneName.Text.Trim()
@@ -304,19 +325,21 @@ Public Class PageTuner
         Try
             TxtTuneName.Text = tune.Name
             
-            ' Restore car search keyword and combobox selection
-            TxtCarSearch.Text = tune.CarSearchKeyword
-            RefreshCarCombo(tune.CarSearchKeyword)
-            
-            If Not String.IsNullOrEmpty(tune.SelectedCarText) Then
-                Dim carIndex = ComboCar.Items.Cast(Of String)().ToList().IndexOf(tune.SelectedCarText)
-                If carIndex <> -1 Then
-                    ComboCar.SelectedIndex = carIndex
-                Else
-                    ' Fallback to first item if not matched exactly
-                    If ComboCar.Items.Count > 0 Then ComboCar.SelectedIndex = 0
-                End If
+            ' Restore the same canonical car text used by the tuner combo box.
+            Dim carKeyword = tune.CarSearchKeyword
+            If Not String.IsNullOrWhiteSpace(tune.State.Make) OrElse Not String.IsNullOrWhiteSpace(tune.State.Model) Then
+                carKeyword = $"{tune.State.Make} {tune.State.Model}".Trim()
             End If
+            TxtCarSearch.Text = carKeyword
+            RefreshCarCombo(carKeyword)
+
+            Dim carItems = ComboCar.Items.Cast(Of String)().ToList()
+            Dim carIndex = carItems.IndexOf(tune.SelectedCarText)
+            If carIndex = -1 AndAlso Not String.IsNullOrWhiteSpace(tune.State.Make) Then
+                Dim prefix = $"{tune.State.Make} {tune.State.Model} ("
+                carIndex = carItems.FindIndex(Function(item) item.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            End If
+            ComboCar.SelectedIndex = carIndex
             
             ' Restore mode button highlight
             ActiveMode = tune.State.TuneId
@@ -377,7 +400,6 @@ Public Class PageTuner
             
             TxtAeroF.Text = tune.State.AeroF.ToString()
             TxtAeroR.Text = tune.State.AeroR.ToString()
-            TxtDragCd.Text = tune.State.DragCd.ToString()
             
         Catch ex As Exception
             ' Log error
@@ -617,36 +639,7 @@ Public Class PageTuner
         Try
             ' Construct the current tuning state
             Dim s As New TuningState()
-            s.TuneId = ActiveMode
-            s.DriveType = If(ComboDriveType.SelectedItem?.ToString(), "AWD")
-            s.CarClass = If(ComboClass.SelectedItem?.ToString(), "A")
-            s.Compound = If(ComboCompound.SelectedItem?.ToString(), "Street")
-            s.DragDist = If(ComboDragDist.SelectedItem?.ToString(), "quarter")
-            s.WeightUnit = Settings.Get(Of String)("UnitWeight", "lbs")
-            s.SpeedUnit = Settings.Get(Of String)("UnitSpeed", "mph")
-            s.PressureUnit = Settings.Get(Of String)("UnitPressure", "psi")
-            s.SpringsUnit = Settings.Get(Of String)("UnitSprings", "lbs/in")
-            Double.TryParse(TxtWeight.Text, s.Weight)
-            Double.TryParse(TxtWeightDist.Text, s.WeightDist)
-            Integer.TryParse(TxtPi.Text, s.Pi)
-            s.TireWF = TxtTireWF.Text
-            s.TireWR = TxtTireWR.Text
-            s.FeelBalance = SliderBalance.Value
-            s.FeelAggression = SliderAggression.Value
-            s.IncludeGearing = ChkGearing.Checked
-            If s.IncludeGearing Then
-                Double.TryParse(TxtRedlineRpm.Text, s.RedlineRpm)
-                Double.TryParse(TxtPeakRpm.Text, s.PeakTorqueRpm)
-                Double.TryParse(TxtMaxTorque.Text, s.MaxTorque)
-                Double.TryParse(TxtTopspeed.Text, s.Topspeed)
-                Integer.TryParse(TxtGears.Text, s.Gears)
-            End If
-            s.HasAero = ChkAero.Checked
-            If s.HasAero Then
-                Double.TryParse(TxtAeroF.Text, s.AeroF)
-                Double.TryParse(TxtAeroR.Text, s.AeroR)
-                Double.TryParse(TxtDragCd.Text, s.DragCd)
-            End If
+            PopulateTuningState(s)
 
             ' Fetch enhancement from AI Client asynchronously
             Dim jsonText = Await Task.Run(Function()

@@ -3,9 +3,9 @@ Imports System.Runtime.CompilerServices
 
 Public Module ModBase
 
-    Public Const VersionBaseName As String = "2.0.1"
-    Public Const VersionCode As Integer = 201
-    Public Const VersionDisplay As String = "v2.0.1"
+    Public Const VersionBaseName As String = "3.1.1"
+    Public Const VersionCode As Integer = 311
+    Public Const VersionDisplay As String = "v3.1.1"
     Public Const CommitHash As String = ""
     Public Const BuildTypeDisplay As String = "UI Kit"
     Public Const VersionBranchMain As String = "main"
@@ -33,7 +33,7 @@ Public Module ModBase
 
     Public Handle As IntPtr
     Public PathExe As String = If(Environment.ProcessPath, AppDomain.CurrentDomain.BaseDirectory & AppDomain.CurrentDomain.FriendlyName)
-    Public PathExeFolder As String = AppDomain.CurrentDomain.BaseDirectory.TrimEnd("\"c) & "\"
+    Public PathExeFolder As String = If(IO.Path.GetDirectoryName(PathExe), AppDomain.CurrentDomain.BaseDirectory).TrimEnd("\"c) & "\"
     Public PathImage As String = "pack://application:,,,/QING.UIKIT;component/Images/"
     Public PathTemp As String = IO.Path.Combine(IO.Path.GetTempPath(), "QING.UIKIT") & "\"
     Public PathAppdata As String = IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "QING.UIKIT") & "\"

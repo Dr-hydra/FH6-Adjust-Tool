@@ -521,8 +521,7 @@ public static class TuningCalculator
             var aeroValues = new List<TuningItem>
             {
                 new() { Key = "Front Downforce", Value = $"{s.AeroF} kg" },
-                new() { Key = "Rear Downforce", Value = $"{s.AeroR} kg" },
-                new() { Key = "Drag Cd", Value = s.DragCd.ToString("F2") }
+                new() { Key = "Rear Downforce", Value = $"{s.AeroR} kg" }
             };
             double total = s.AeroF + s.AeroR;
             if (total > 0)

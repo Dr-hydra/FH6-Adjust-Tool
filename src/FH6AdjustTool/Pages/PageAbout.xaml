@@ -12,7 +12,8 @@
             <local:MyCard x:Name="CardFeatures" Title="功能说明" Margin="0,0,0,15">
                 <StackPanel Margin="20,40,20,18">
                     <TextBlock Text="FH6 调校工具将物理调校计算、AI 诊断、本地方案管理和实时遥测复盘整合到同一个桌面客户端中。" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource ColorBrushGray3}" LineHeight="1.5" Margin="0,0,0,12" />
-                    <local:MyListItem Title="存档调校导入" Info="只读扫描本地 FH6 存档中的 Tuning 容器，提取作者、调校名、车型和已识别滑块，勾选后导入为本地方案。" IsHitTestVisible="False" Height="50" />
+                    <local:MyListItem Title="FH6 游戏数据库" Info="车型规格、配重、PI、原厂终传和逐挡齿比直接读取上游解析器的 SQLite 数据库，不再使用 cars.json。" IsHitTestVisible="False" Height="50" />
+                    <local:MyListItem Title="存档调校导入" Info="解析升级件并还原调校 UI 实际数值；按轮胎推荐计算模式，并展示包含发动机内部升级的非原厂配件摘要。" IsHitTestVisible="False" Height="50" />
                     <local:MyListItem Title="遥测仪表盘" Info="监听游戏 Data Out UDP 数据，实时显示速度、转速、档位、油门、刹车、当前圈计时和路线轨迹。" IsHitTestVisible="False" Height="50" />
                     <local:MyListItem Title="圈速与调校对比" Info="记录 Time Attack / Rivals 圈速，并按调校名称汇总最佳圈速、平均表现和圈数。" IsHitTestVisible="False" Height="50" />
                     <local:MyListItem Title="问题标记" Info="自动提示抓地极限、悬挂压缩到底、重刹锁死等风险，也支持在复盘时手动标记问题点。" IsHitTestVisible="False" Height="50" />
@@ -41,6 +42,7 @@
                     <local:MyListItem Title="社区研究员 Kireth" Info="提供了早期的地平线 6 物理机制反馈与物理调校常数校验。" IsHitTestVisible="False" Height="50" />
                     <local:MyListItem Title="ForzaTune Pro 公式推导" Info="弹簧自然频率（K = M × (2πf)²）及阻尼常数公式的重要参考来源。" IsHitTestVisible="False" Height="50" />
                     <local:MyListItem Title="Forza Data Out" Info="实时遥测、圈速识别、路线回放和问题标记基于游戏输出的 UDP 遥测数据构建。" IsHitTestVisible="False" Height="50" />
+                    <local:MyListItem Title="fh6-file-analyse" Info="提供 FH6 游戏 SQLite 数据库、车辆资源名称表以及存档升级件与调校滑杆格式研究成果。" IsHitTestVisible="False" Height="50" />
                     <local:MyListItem Title="界面框架 QING.UIKIT" Info="基于 Meloong-Git/PCL 重构整理的 VB.NET / WPF 界面控件模板库。" IsHitTestVisible="False" Height="50" />
                 </StackPanel>
             </local:MyCard>

@@ -99,9 +99,9 @@
                         <local:MyButton x:Name="BtnModeRace" Text="🏁 赛道日 (Race)" Margin="4" Padding="8,8" />
                         <local:MyButton x:Name="BtnModeTouge" Text="⛰ 山路 (Touge)" Margin="4" Padding="8,8" />
                         <local:MyButton x:Name="BtnModeWangan" Text="🌃 湾岸 (Wangan)" Margin="4" Padding="8,8" />
-                        <local:MyButton x:Name="BtnModeDrift" Text="💨 漂移 (Drift)" Margin="4" Padding="8,8" />
+                        <local:MyButton x:Name="BtnModeDrift" Text="↻ 漂移 (Drift)" Margin="4" Padding="8,8" />
                         <local:MyButton x:Name="BtnModeDrag" Text="⚡ 直线 (Drag)" Margin="4" Padding="8,8" />
-                        <local:MyButton x:Name="BtnModeRally" Text="🪨 拉力 (Rally)" Margin="4" Padding="8,8" />
+                        <local:MyButton x:Name="BtnModeRally" Text="🚙 拉力 (Rally)" Margin="4" Padding="8,8" />
                         <local:MyButton x:Name="BtnModeRain" Text="🌧 雨天 (Rain)" Margin="4" Padding="8,8" />
                         <local:MyButton x:Name="BtnModeGeneral" Text="🔧 通用 (General)" Margin="4" Padding="8,8" />
                     </UniformGrid>
@@ -208,10 +208,6 @@
                                         <local:MyTextBox x:Name="TxtAeroR" Height="34" Text="150" />
                                     </StackPanel>
                                 </Grid>
-                                <StackPanel Margin="0,0,0,8">
-                                    <TextBlock Text="风阻系数 (Drag Cd)" Margin="0,0,0,4" Foreground="{DynamicResource ColorBrushGray3}" FontSize="11" />
-                                    <local:MyTextBox x:Name="TxtDragCd" Height="34" Text="0.35" />
-                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
                     </Grid>

@@ -18,6 +18,16 @@ public class SavedTune
     public string SelectedCarText { get; set; } = "";
     public TuningState State { get; set; } = new();
     public TuningResult Result { get; set; } = new();
+    public string SourceFingerprint { get; set; } = "";
+    public string SourceCarId { get; set; } = "";
+    public string SourceFolderName { get; set; } = "";
+    public string SourceAuthor { get; set; } = "";
+    public double EstimatedWeightKg { get; set; }
+    public double StockWeightKg { get; set; }
+    public bool PerformanceRatingIsStockFallback { get; set; }
+    public string SpecificationNote { get; set; } = "";
+    public string ModeRecommendationReason { get; set; } = "";
+    public List<InstalledPartSummary> InstalledParts { get; set; } = new();
 }
 
 public class SavedTuneSummary
@@ -31,6 +41,13 @@ public class SavedTuneSummary
     public string Model { get; set; } = "";
     public string CarClass { get; set; } = "";
     public int Pi { get; set; }
+    public string SourceFingerprint { get; set; } = "";
+}
+
+public enum ImportedTuneSaveResult
+{
+    Added,
+    Updated
 }
 
 public static class SavedTunesDatabase
@@ -202,6 +219,27 @@ public static class SavedTunesDatabase
         }
     }
 
+    public static ImportedTuneSaveResult SaveImportedTune(SavedTune tune)
+    {
+        lock (Lock)
+        {
+            var existing = string.IsNullOrWhiteSpace(tune.SourceFingerprint)
+                ? null
+                : _summaries.FirstOrDefault(summary =>
+                    string.Equals(summary.SourceFingerprint, tune.SourceFingerprint, StringComparison.OrdinalIgnoreCase));
+            if (existing != null)
+            {
+                tune.Id = existing.Id;
+                tune.Name = existing.Name;
+                SaveTune(tune);
+                return ImportedTuneSaveResult.Updated;
+            }
+
+            SaveTune(tune);
+            return ImportedTuneSaveResult.Added;
+        }
+    }
+
     public static void DeleteTune(string id)
     {
         if (string.IsNullOrWhiteSpace(id))
@@ -241,6 +279,7 @@ public static class SavedTunesDatabase
                 model TEXT,
                 car_class TEXT,
                 pi INTEGER,
+                source_fingerprint TEXT,
                 payload_json TEXT NOT NULL
             );
             CREATE UNIQUE INDEX IF NOT EXISTS idx_saved_tunes_name ON saved_tunes(name COLLATE NOCASE);
@@ -248,6 +287,13 @@ public static class SavedTunesDatabase
             CREATE INDEX IF NOT EXISTS idx_saved_tunes_saved_at ON saved_tunes(saved_at_ticks DESC);
             """;
         command.ExecuteNonQuery();
+
+        EnsureColumn(connection, "saved_tunes", "source_fingerprint", "TEXT");
+        using var indexCommand = connection.CreateCommand();
+        indexCommand.CommandText =
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_saved_tunes_source_fingerprint " +
+            "ON saved_tunes(source_fingerprint) WHERE source_fingerprint IS NOT NULL AND source_fingerprint <> '';";
+        indexCommand.ExecuteNonQuery();
     }
 
     private static void MigrateLegacySourcesIfNeeded()
@@ -344,10 +390,10 @@ public static class SavedTunesDatabase
             """
             INSERT INTO saved_tunes (
                 id, name, saved_at_ticks, car_search_keyword, selected_car_text,
-                make, model, car_class, pi, payload_json
+                make, model, car_class, pi, source_fingerprint, payload_json
             ) VALUES (
                 $id, $name, $saved_at_ticks, $car_search_keyword, $selected_car_text,
-                $make, $model, $car_class, $pi, $payload_json
+                $make, $model, $car_class, $pi, $source_fingerprint, $payload_json
             )
             ON CONFLICT(id) DO UPDATE SET
                 name = excluded.name,
@@ -358,6 +404,7 @@ public static class SavedTunesDatabase
                 model = excluded.model,
                 car_class = excluded.car_class,
                 pi = excluded.pi,
+                source_fingerprint = excluded.source_fingerprint,
                 payload_json = excluded.payload_json;
             """;
         AddSummaryParameters(command, summary);
@@ -373,7 +420,7 @@ public static class SavedTunesDatabase
         command.CommandText =
             """
             SELECT id, name, saved_at_ticks, car_search_keyword, selected_car_text,
-                   make, model, car_class, pi
+                   make, model, car_class, pi, source_fingerprint
             FROM saved_tunes
             ORDER BY saved_at_ticks DESC, name COLLATE NOCASE;
             """;
@@ -399,7 +446,8 @@ public static class SavedTunesDatabase
             Make = Text(reader, "make"),
             Model = Text(reader, "model"),
             CarClass = Text(reader, "car_class"),
-            Pi = Int(reader, "pi")
+            Pi = Int(reader, "pi"),
+            SourceFingerprint = Text(reader, "source_fingerprint")
         };
     }
 
@@ -415,7 +463,8 @@ public static class SavedTunesDatabase
             Make = tune.State?.Make ?? "",
             Model = tune.State?.Model ?? "",
             CarClass = tune.State?.CarClass ?? "",
-            Pi = tune.State?.Pi ?? 0
+            Pi = tune.State?.Pi ?? 0,
+            SourceFingerprint = tune.SourceFingerprint
         };
     }
 
@@ -464,6 +513,26 @@ public static class SavedTunesDatabase
         Add(command, "$model", NullIfEmpty(summary.Model));
         Add(command, "$car_class", NullIfEmpty(summary.CarClass));
         Add(command, "$pi", summary.Pi);
+        Add(command, "$source_fingerprint", NullIfEmpty(summary.SourceFingerprint));
+    }
+
+    private static void EnsureColumn(SqliteConnection connection, string tableName, string columnName, string columnType)
+    {
+        using var infoCommand = connection.CreateCommand();
+        infoCommand.CommandText = $"PRAGMA table_info({tableName});";
+        using var reader = infoCommand.ExecuteReader();
+        while (reader.Read())
+        {
+            if (string.Equals(Convert.ToString(reader["name"]), columnName, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+        }
+
+        reader.Close();
+        using var alterCommand = connection.CreateCommand();
+        alterCommand.CommandText = $"ALTER TABLE {tableName} ADD COLUMN {columnName} {columnType};";
+        alterCommand.ExecuteNonQuery();
     }
 
     private static string? NullIfEmpty(string? value)

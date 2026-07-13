@@ -74,9 +74,9 @@ Public Class FormMain
         IsSizeSaveable = True
         ShowWindowToTop()
 
-        ' Initialize Car Database
-        Dim localCarsJsonPath = IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cars.json")
-        CarDatabase.Initialize(localCarsJsonPath)
+        ' Initialize the FH6 game database and its readable vehicle-name catalog.
+        Dim gameDataDirectory = IO.Path.Combine(PathExeFolder, "Data")
+        CarDatabase.Initialize(gameDataDirectory)
 
         ' Initialize Saved Tunes Database
         SavedTunesDatabase.Initialize()
